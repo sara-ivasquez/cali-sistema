@@ -1,0 +1,30 @@
+[
+  {
+    "id": "F01",
+    "nombre": "Vistas mensuales del artículo de Cali en Wikipedia",
+    "entidad": "Wikimedia Foundation",
+    "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/es.wikipedia/all-access/user/Cali/monthly/20250101/20260930",
+    "formato": "JSON",
+    "acceso": "API sin llave",
+    "licencia": "CC0",
+    "personas": "No",
+    "estado": "Candidata",
+    "probado": null,
+    "como_se_encontro": "Ejemplo del laboratorio, adaptado a Cali",
+    "observaciones": "Verificar el nombre exacto del artículo y que no sea desambiguación"
+  },
+  {
+    "id": "F02",
+    "nombre": "Medición de Desempeño Municipal (MDM)",
+    "entidad": "Departamento Nacional de Planeación (DNP)",
+    "url": "https://www.datos.gov.co/resource/nkjx-rsq7.json",
+    "formato": "JSON",
+    "acceso": "API sin llave (Socrata)",
+    "licencia": "no declara",
+    "personas": "No",
+    "estado": "Candidata",
+    "probado": null,
+    "como_se_encontro": "Ejemplo del laboratorio (DuckDB remoto), cambiando 05001 por 76001",
+    "observaciones": "Copiar la licencia tal como aparezca en la ficha del conjunto en datos.gov.co"
+  }
+]

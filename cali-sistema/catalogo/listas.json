@@ -1,0 +1,11 @@
+{
+  "_nota": "Listas cerradas. Antes de escribir una entidad o licencia en fuentes.json, agréguela aquí UNA vez y úsela siempre igual.",
+  "entidades": [
+    "Wikimedia Foundation",
+    "Departamento Nacional de Planeación (DNP)",
+    "Departamento Administrativo Nacional de Estadística (DANE)",
+    "Alcaldía de Santiago de Cali"
+  ],
+  "licencias": ["CC0", "CC BY 4.0", "CC BY-SA 4.0", "ODbL", "no declara"],
+  "estados": ["Integrada al lago", "Candidata", "No responde", "No existe", "Descartada"]
+}

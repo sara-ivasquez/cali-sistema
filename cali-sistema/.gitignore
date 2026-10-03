@@ -1,0 +1,9 @@
+# Los crudos nunca llegan al repositorio
+lago/raw/*
+!lago/raw/.gitkeep
+# Secretos y basura de Python
+.env
+__pycache__/
+*.pyc
+.venv/
+*.duckdb
