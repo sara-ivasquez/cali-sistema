@@ -1,0 +1,31 @@
+{
+  "fuente": "F02",
+  "url": "https://www.datos.gov.co/resource/nkjx-rsq7.json?$select=anio,dato&$where=codigo_entidad%3D%2776001%27%20AND%20indicador%3D%27MDM%27&$order=anio",
+  "vigencia": "2020",
+  "probado": "2026-10-03",
+  "cifras": {
+    "mdm_ultimo_anio": 86.45
+  },
+  "registros": [
+    {
+      "anio": 2016,
+      "mdm": 77.2
+    },
+    {
+      "anio": 2017,
+      "mdm": 63.82
+    },
+    {
+      "anio": 2018,
+      "mdm": 81.38
+    },
+    {
+      "anio": 2019,
+      "mdm": 83.74
+    },
+    {
+      "anio": 2020,
+      "mdm": 86.45
+    }
+  ]
+}

@@ -8,10 +8,10 @@
     "acceso": "API sin llave",
     "licencia": "CC0",
     "personas": "No",
-    "estado": "Candidata",
-    "probado": null,
+    "estado": "Integrada al lago",
+    "probado": "2026-10-05",
     "como_se_encontro": "Ejemplo del laboratorio, adaptado a Cali",
-    "observaciones": "Verificar el nombre exacto del artículo y que no sea desambiguación"
+    "observaciones": "El artículo 'Cali' es el principal (no redirección ni desambiguación; esa es 'Cali (desambiguación)'). No cuenta visitas que entran por 'Santiago de Cali'."
   },
   {
     "id": "F02",
@@ -20,11 +20,12 @@
     "url": "https://www.datos.gov.co/resource/nkjx-rsq7.json",
     "formato": "JSON",
     "acceso": "API sin llave (Socrata)",
-    "licencia": "no declara",
+    "licencia": "CC BY-SA 4.0",
+    "licencia_url": "https://creativecommons.org/licenses/by-sa/4.0/",
     "personas": "No",
-    "estado": "Candidata",
-    "probado": null,
+    "estado": "Integrada al lago",
+    "probado": "2026-10-05",
     "como_se_encontro": "Ejemplo del laboratorio (DuckDB remoto), cambiando 05001 por 76001",
-    "observaciones": "Copiar la licencia tal como aparezca en la ficha del conjunto en datos.gov.co"
+    "observaciones": "Frecuencia declarada anual, pero datos sin actualizar desde 2022-02-21; serie 2016-2020. Fuente original: Portal Territorial DNP."
   }
 ]

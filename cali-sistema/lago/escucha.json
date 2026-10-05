@@ -1,0 +1,95 @@
+{
+  "fuente": "F01",
+  "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/es.wikipedia/all-access/user/Cali/monthly/20250101/20260930",
+  "vigencia": "2026-09",
+  "probado": "2026-10-03",
+  "cifras": {
+    "vistas_ultimo_mes": 8495
+  },
+  "registros": [
+    {
+      "periodo": "2025-01",
+      "vistas": 16345
+    },
+    {
+      "periodo": "2025-02",
+      "vistas": 14459
+    },
+    {
+      "periodo": "2025-03",
+      "vistas": 15764
+    },
+    {
+      "periodo": "2025-04",
+      "vistas": 13927
+    },
+    {
+      "periodo": "2025-05",
+      "vistas": 14262
+    },
+    {
+      "periodo": "2025-06",
+      "vistas": 12784
+    },
+    {
+      "periodo": "2025-07",
+      "vistas": 17083
+    },
+    {
+      "periodo": "2025-08",
+      "vistas": 16268
+    },
+    {
+      "periodo": "2025-09",
+      "vistas": 12569
+    },
+    {
+      "periodo": "2025-10",
+      "vistas": 12412
+    },
+    {
+      "periodo": "2025-11",
+      "vistas": 16740
+    },
+    {
+      "periodo": "2025-12",
+      "vistas": 11797
+    },
+    {
+      "periodo": "2026-01",
+      "vistas": 12057
+    },
+    {
+      "periodo": "2026-02",
+      "vistas": 9973
+    },
+    {
+      "periodo": "2026-03",
+      "vistas": 9854
+    },
+    {
+      "periodo": "2026-04",
+      "vistas": 10202
+    },
+    {
+      "periodo": "2026-05",
+      "vistas": 10130
+    },
+    {
+      "periodo": "2026-06",
+      "vistas": 10726
+    },
+    {
+      "periodo": "2026-07",
+      "vistas": 12281
+    },
+    {
+      "periodo": "2026-08",
+      "vistas": 24431
+    },
+    {
+      "periodo": "2026-09",
+      "vistas": 8495
+    }
+  ]
+}
