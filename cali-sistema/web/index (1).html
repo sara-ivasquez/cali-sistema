@@ -323,8 +323,8 @@ function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;
 const METRICAS = {
   arboles_km2: {
     nombre: "Árboles por km²",
-    formula: "no_arboles / (area_m2 / 1.000.000)",
-    calcular: p => (p.no_arboles != null && p.area_m2 > 0) ? p.no_arboles / (p.area_m2 / 1e6) : null,
+    formula: "no_arboles / área del polígono de la comuna en km² (calculada desde la geometría)",
+    calcular: p => (p.no_arboles != null && p.__area_km2 > 0) ? p.no_arboles / p.__area_km2 : null,
     formato: v => fmtEntero.format(v),
   },
   arboles: {
@@ -340,9 +340,9 @@ const METRICAS = {
     formato: v => fmtEntero.format(v),
   },
   area_km2: {
-    nombre: "Área",
-    formula: "area_m2 / 1.000.000",
-    calcular: p => p.area_m2 != null ? p.area_m2 / 1e6 : null,
+    nombre: "Área de la comuna",
+    formula: "área del polígono en km², calculada desde la geometría (no se usa el campo area_m2, cuyo significado no está confirmado)",
+    calcular: p => p.__area_km2 ?? null,
     formato: v => fmtUno.format(v) + " km²",
   },
   pct_rural: {
@@ -602,10 +602,26 @@ function vistaGestion() {
 let mapa = null, metricaMapa = "arboles_km2";
 const PALETA = ["#1c3328", "#24543a", "#2f7a4c", "#4ea36a", "#7ccf9a", "#c3efcf"];
 
+/** Área de un polígono en km² (proyección local; error despreciable a la escala de una comuna) */
+function areaKm2(geom) {
+  const anillo = r => {
+    const lat0 = r.reduce((s, c) => s + c[1], 0) / r.length * Math.PI / 180;
+    const kx = 111.32 * Math.cos(lat0), ky = 110.57;
+    let a = 0;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) a += (r[j][0] * kx) * (r[i][1] * ky) - (r[i][0] * kx) * (r[j][1] * ky);
+    return Math.abs(a) / 2;
+  };
+  const poligono = p => anillo(p[0]) - p.slice(1).reduce((s, h) => s + anillo(h), 0);
+  if (geom.type === "Polygon") return poligono(geom.coordinates);
+  if (geom.type === "MultiPolygon") return geom.coordinates.reduce((s, p) => s + poligono(p), 0);
+  return null;
+}
+
 function vistaTerritorio() {
   const caja = document.getElementById("territorio-contenido");
   const geo = D.comunas;
   if (!geo) { caja.innerHTML = errorDe("comunas"); return; }
+  geo.features.forEach(f => { f.properties.__area_km2 = areaKm2(f.geometry); });
   const feats = geo.features;
   const total = feats.reduce((s, f) => s + (f.properties.no_arboles || 0), 0);
   caja.innerHTML = `
