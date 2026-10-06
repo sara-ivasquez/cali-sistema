@@ -43,19 +43,19 @@
     "como_se_encontro": "Búsqueda web en el portal datos.cali.gov.co",
     "observaciones": "Cálculos del DAPM con base en DANE. Datos y metadatos sin actualizar desde 2018-10-29; proyección solo hasta 2020. La columna de descripción llega con el nombre mal codificado."
   },
-  {
+   {
     "id": "F04",
-    "nombre": "Comunas de Santiago de Cali (límites)",
+    "nombre": "Comunas de Santiago de Cali con censo arbóreo (límites y árboles por comuna)",
     "entidad": "Alcaldía de Santiago de Cali",
     "url": "https://ws-idesc.cali.gov.co/geoserver/wfs",
-    "formato": "GeoJSON (servicio WFS de la IDESC, capa idesc:mc_comunas)",
+    "formato": "GeoJSON (servicio WFS de la IDESC, capa expediente_municipal:emc_amb_sos_car_censo_arboreo_comuna)",
     "acceso": "Servicio WFS sin llave",
     "licencia": "CC BY-SA (sin versión declarada)",
     "personas": "No",
-    "estado": "No responde",
+    "estado": "Integrada al lago",
     "probado": "2026-10-05",
-    "como_se_encontro": "Ficha 'Servicio WMS Comunas de Cali' en datos.cali.gov.co y página de servicios WFS de la IDESC",
-    "observaciones": "Sistema de coordenadas nativo MAGNA-SIRGAS origen Cali (EPSG:6249); se pide reproyectado a EPSG:4326 para el mapa. Licencia tomada de la ficha WMS de la misma capa."
+    "como_se_encontro": "GetCapabilities del WFS de la IDESC: 357 capas, 4 mencionan 'comuna'",
+    "observaciones": "La capa documentada en el portal (idesc:mc_comunas, ficha 2020) ya no existe. La capa oficial de comunas de Planeación (dapm:pdt_dpa_comunas) está publicada pero responde 'permission denied'. Se usan los límites de la capa del censo arbóreo; pueden diferir de la división oficial vigente. Licencia tomada de la ficha WMS de comunas, falta confirmarla para esta capa."
   },
   {
     "id": "F05",
