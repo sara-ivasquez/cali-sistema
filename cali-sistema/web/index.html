@@ -115,6 +115,16 @@
   .selector button[aria-pressed="true"] { background: var(--saman); color: #0d2016; border-color: var(--saman); }
   .escala { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--gris); margin-top: 10px; }
   .escala .barra { height: 10px; flex: 0 1 240px; border-radius: 5px; }
+
+  /* ---------- comparador de dos comunas ---------- */
+  .comparar-selectores { display: flex; flex-wrap: wrap; gap: 16px; }
+  .comparar-selectores label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--gris); flex: 1 1 200px; }
+  .comparar-selectores select {
+    font: 500 16px var(--texto); color: var(--tinta); background: var(--noche);
+    border: 1px solid var(--borde); border-radius: 10px; padding: 9px 12px; cursor: pointer;
+  }
+  #comparar-salida { margin-top: 18px; }
+  #comparar-salida table th[scope="row"] { color: var(--tinta); font-weight: 500; }
   .ficha-comuna { position: absolute; left: 14px; bottom: 14px; max-width: 320px; background: rgba(22,37,43,.96); border: 1px solid var(--borde); border-radius: 14px; padding: 16px; display: none; }
   .ficha-comuna.visible { display: block; }
   .ficha-comuna h3 { font-size: 28px; }
@@ -291,8 +301,12 @@
    ===================================================================== */
 const REPO = "sara-ivasquez/cali-sistema";
 const RAMA = "main";
+// El repositorio guarda todo el proyecto dentro de una subcarpeta "cali-sistema/",
+// así que la ruta raw de los datos lleva ese prefijo. Los fallbacks "../" y "./"
+// cubren el caso de abrir la página desde web/ dentro del repo ya clonado.
+const SUBCARPETA = "cali-sistema/";
 const PARAM_BASE = new URLSearchParams(location.search).get("base"); // solo para pruebas locales
-const BASES = PARAM_BASE ? [PARAM_BASE] : [`https://raw.githubusercontent.com/${REPO}/${RAMA}/`, "../", "./"];
+const BASES = PARAM_BASE ? [PARAM_BASE] : [`https://raw.githubusercontent.com/${REPO}/${RAMA}/${SUBCARPETA}`, "../", "./"];
 const ARCHIVOS = {
   poblacion: "lago/poblacion.json",
   desempeno: "lago/desempeno.json",
@@ -410,6 +424,8 @@ function abrirTraza(t) {
   const filas = [];
   filas.push(["Cifra", `${esc(t.texto)}${t.detalle ? " — " + esc(t.detalle) : ""}`]);
   if (t.metrica) filas.push(["Cómo se calcula", `${esc(METRICAS[t.metrica].nombre)}<div class="formula">${esc(METRICAS[t.metrica].formula)}</div>`]);
+  if (t.formulaLibre) filas.push(["Cómo se calcula", `<div class="formula">${esc(t.formulaLibre)}</div>`]);
+  if (t.fuentesValores) filas.push(["Valores comparados", esc(t.fuentesValores)]);
   if (f) {
     filas.push(["Fuente", `${esc(f.id)} · ${esc(f.nombre)}`]);
     filas.push(["Entidad", esc(f.entidad)]);
@@ -563,6 +579,7 @@ function vistaGente() {
         etiquetas: r.map(x => String(x.anio)), formatoY: compacto, cadaX: 5,
       })}
       <p class="nota">Entre ${esc(ini.anio)} y ${esc(u.anio)} la población cambió ${cifra("poblacion", METRICAS.variacion_pob.formato(vari), `${ini.anio}–${u.anio}`, { metrica: "variacion_pob" })}. Según la descripción de la fuente, los primeros años de la serie son estimaciones y los más recientes, proyecciones.</p>
+      <p class="selector" style="margin-top:14px"><a href="explorar/chartjs_poblacion.html${location.search}" class="selector-enlace" style="font:500 15px var(--texto);color:var(--tinta);background:var(--monte);border:1px solid var(--borde);border-radius:999px;padding:7px 14px;text-decoration:none;display:inline-block">Ver la misma serie con Chart.js</a> <span style="color:var(--gris);font-size:14px">— exploración de herramientas, se abre aparte</span></p>
     </div>
     ${u.poblacion_rural != null ? `<div class="bloque grafica">
       <h3>Población rural (corregimientos)</h3>
@@ -638,6 +655,19 @@ function vistaTerritorio() {
       <div class="ficha-comuna" id="ficha-comuna" aria-live="polite"></div>
     </div>
     <div class="escala" id="escala"></div>
+    <div class="bloque" id="comparador" style="margin-top:20px">
+      <h3>Comparar dos comunas</h3>
+      <p class="intro" style="margin-bottom:16px">Elige dos comunas para ver sus cifras lado a lado y la diferencia entre ellas. Es una descripción de los datos del censo arbóreo, no un juicio sobre cuál comuna está mejor.</p>
+      <div class="comparar-selectores">
+        <label>Comuna A
+          <select id="comuna-a"></select>
+        </label>
+        <label>Comuna B
+          <select id="comuna-b"></select>
+        </label>
+      </div>
+      <div id="comparar-salida" aria-live="polite"></div>
+    </div>
     <div class="bloque tabla-caja" style="margin-top:20px" id="tabla-comunas"></div>`;
 
   caja.querySelectorAll("[data-metrica]").forEach(b => b.addEventListener("click", () => {
@@ -645,8 +675,98 @@ function vistaTerritorio() {
     caja.querySelectorAll("[data-metrica]").forEach(x => x.setAttribute("aria-pressed", x === b));
     pintarMapa();
   }));
+  comparadorComunas();
   tablaComunas();
   crearMapa();
+}
+
+/* ---------- comparador de dos comunas ---------- */
+// Indicadores comparables. Las fórmulas de las derivadas se reutilizan de METRICAS;
+// "arbol_sano" es un campo crudo del censo (no una métrica derivada).
+const COMPARABLES = [
+  { metrica: "arboles" },
+  { crudo: "arbol_sano", nombre: "Árboles sanos" },
+  { metrica: "secos_muertos" },
+  { metrica: "area_km2" },
+  { metrica: "arboles_km2" },
+];
+
+function nombreComuna(p) { return p.nombre || ("Comuna " + p.id_comuna); }
+
+function valorComparable(c, p) {
+  if (c.metrica) return METRICAS[c.metrica].calcular(p);
+  return p[c.crudo] != null ? p[c.crudo] : null;
+}
+function nombreComparable(c) { return c.metrica ? METRICAS[c.metrica].nombre : c.nombre; }
+function formatoComparable(c, v) { return c.metrica ? METRICAS[c.metrica].formato(v) : fmtEntero.format(v); }
+function esArea(c) { return c.metrica === "area_km2"; }
+
+function comparadorComunas() {
+  const geo = D.comunas;
+  const salida = document.getElementById("comparar-salida");
+  const selA = document.getElementById("comuna-a"), selB = document.getElementById("comuna-b");
+  if (!geo || !selA || !selB) return;
+  const feats = geo.features.slice();
+  if (feats.length < 2) {
+    salida.innerHTML = `<p class="aviso">No hay suficientes comunas en el GeoJSON para comparar.</p>`;
+    return;
+  }
+  // ordenar por id_comuna para una lista estable
+  feats.sort((a, b) => (a.properties.id_comuna ?? 0) - (b.properties.id_comuna ?? 0));
+  const opciones = feats.map((f, i) => `<option value="${i}">${esc(nombreComuna(f.properties))}</option>`).join("");
+  selA.innerHTML = opciones; selB.innerHTML = opciones;
+  selA.selectedIndex = 0;
+  selB.selectedIndex = Math.min(1, feats.length - 1);
+  const pintar = () => pintarComparacion(feats, +selA.value, +selB.value);
+  selA.onchange = pintar; selB.onchange = pintar;
+  pintar();
+}
+
+function pintarComparacion(feats, iA, iB) {
+  const salida = document.getElementById("comparar-salida");
+  if (iA === iB) {
+    salida.innerHTML = `<p class="aviso">Selecciona dos comunas distintas para ver la diferencia.</p>`;
+    return;
+  }
+  const pA = feats[iA].properties, pB = feats[iB].properties;
+  const nA = nombreComuna(pA), nB = nombreComuna(pB);
+  const filas = COMPARABLES.map(c => {
+    const vA = valorComparable(c, pA), vB = valorComparable(c, pB);
+    const celdaA = vA == null ? `<td class="num">sin dato</td>`
+      : `<td class="num">${cifra("comunas", formatoComparable(c, vA), null, c.metrica ? { metrica: c.metrica, detalle: nA } : { detalle: `${nA}, campo ${c.crudo}` })}</td>`;
+    const celdaB = vB == null ? `<td class="num">sin dato</td>`
+      : `<td class="num">${cifra("comunas", formatoComparable(c, vB), null, c.metrica ? { metrica: c.metrica, detalle: nB } : { detalle: `${nB}, campo ${c.crudo}` })}</td>`;
+    let celdaDif = `<td class="num">sin dato</td>`;
+    if (vA != null && vB != null) {
+      const dif = vA - vB;
+      const difTxt = (dif > 0 ? "+" : "") + (esArea(c) ? fmtUno.format(dif) + " km²" : fmtEntero.format(dif));
+      const origen = c.metrica
+        ? `${nombreComparable(c)} de ${nA} (${METRICAS[c.metrica].formula}) menos ${nombreComparable(c)} de ${nB}`
+        : `${nombreComparable(c)} de ${nA} (campo ${c.crudo}) menos ${nombreComparable(c)} de ${nB} (campo ${c.crudo})`;
+      // diferencia porcentual respecto a B, solo si B != 0
+      let pctTxt = "";
+      if (vB !== 0) {
+        const pct = dif / vB * 100;
+        pctTxt = ` <span class="vig">(${(pct >= 0 ? "+" : "") + fmtUno.format(pct)} % respecto a B)</span>`;
+      } else {
+        pctTxt = ` <span class="vig">(% respecto a B no definido: B = 0)</span>`;
+      }
+      celdaDif = `<td class="num">${cifra("comunas", difTxt, null, {
+        detalle: `A − B = ${nA} − ${nB}`,
+        formulaLibre: `A − B${vB !== 0 ? " · variación % respecto a B = (A − B) / B × 100" : " · B = 0, no se calcula el porcentaje"}`,
+        fuentesValores: origen,
+      })}${pctTxt}</td>`;
+    }
+    return `<tr><th scope="row">${esc(nombreComparable(c))}</th>${celdaA}${celdaB}${celdaDif}</tr>`;
+  }).join("");
+  salida.innerHTML = `
+    <div class="tabla-caja">
+      <table>
+        <thead><tr><th scope="col">Indicador</th><th scope="col">${esc(nA)} (A)</th><th scope="col">${esc(nB)} (B)</th><th scope="col">Diferencia A − B</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>
+    <p class="nota">La diferencia es el valor de A menos el de B. El porcentaje, cuando aparece, se calcula respecto a B. Área y árboles por km² usan el área calculada desde la geometría, no el campo <code>area_m2</code>. Toca cualquier cifra para ver su fuente y, en las diferencias, su fórmula.</p>`;
 }
 
 function rangosMetrica(k) {
