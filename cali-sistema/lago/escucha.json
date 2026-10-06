@@ -2,7 +2,7 @@
   "fuente": "F01",
   "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/es.wikipedia/all-access/user/Cali/monthly/20250101/20260930",
   "vigencia": "2026-09",
-  "probado": "2026-10-03",
+  "probado": "2026-10-05",
   "cifras": {
     "vistas_ultimo_mes": 8495
   },

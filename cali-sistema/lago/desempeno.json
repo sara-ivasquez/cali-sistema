@@ -2,7 +2,7 @@
   "fuente": "F02",
   "url": "https://www.datos.gov.co/resource/nkjx-rsq7.json?$select=anio,dato&$where=codigo_entidad%3D%2776001%27%20AND%20indicador%3D%27MDM%27&$order=anio",
   "vigencia": "2020",
-  "probado": "2026-10-03",
+  "probado": "2026-10-05",
   "cifras": {
     "mdm_ultimo_anio": 86.45
   },

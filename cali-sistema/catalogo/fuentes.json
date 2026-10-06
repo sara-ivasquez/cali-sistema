@@ -27,5 +27,48 @@
     "probado": "2026-10-05",
     "como_se_encontro": "Ejemplo del laboratorio (DuckDB remoto), cambiando 05001 por 76001",
     "observaciones": "Frecuencia declarada anual, pero datos sin actualizar desde 2022-02-21; serie 2016-2020. Fuente original: Portal Territorial DNP."
+    
+  }, 
+    {
+    "id": "F03",
+    "nombre": "Estimaciones y proyecciones de población y densidad. Cali, 1987-2020",
+    "entidad": "Alcaldía de Santiago de Cali",
+    "url": "https://datos.cali.gov.co/dataset/estimaciones-y-proyecciones-de-poblacion-y-densidad-cali-1987-2020/resource/fb8150d6-2af0-4d75-b741-33aaf871b19c",
+    "formato": "CSV (API CKAN datastore en JSON)",
+    "acceso": "API sin llave (CKAN)",
+    "licencia": "CC BY-SA (sin versión declarada)",
+    "personas": "No",
+    "estado": "Integrada al lago",
+    "probado": "2026-10-05",
+    "como_se_encontro": "Búsqueda web en el portal datos.cali.gov.co",
+    "observaciones": "Cálculos del DAPM con base en DANE. Datos y metadatos sin actualizar desde 2018-10-29; proyección solo hasta 2020. La columna de descripción llega con el nombre mal codificado."
+  },
+  {
+    "id": "F04",
+    "nombre": "Comunas de Santiago de Cali (límites)",
+    "entidad": "Alcaldía de Santiago de Cali",
+    "url": "https://ws-idesc.cali.gov.co/geoserver/wfs",
+    "formato": "GeoJSON (servicio WFS de la IDESC, capa idesc:mc_comunas)",
+    "acceso": "Servicio WFS sin llave",
+    "licencia": "CC BY-SA (sin versión declarada)",
+    "personas": "No",
+    "estado": "No responde",
+    "probado": "2026-10-05",
+    "como_se_encontro": "Ficha 'Servicio WMS Comunas de Cali' en datos.cali.gov.co y página de servicios WFS de la IDESC",
+    "observaciones": "Sistema de coordenadas nativo MAGNA-SIRGAS origen Cali (EPSG:6249); se pide reproyectado a EPSG:4326 para el mapa. Licencia tomada de la ficha WMS de la misma capa."
+  },
+  {
+    "id": "F05",
+    "nombre": "Proyecciones de población municipal 2018-2042 (CNPV 2018, actualización post COVID-19)",
+    "entidad": "Departamento Administrativo Nacional de Estadística (DANE)",
+    "url": "https://www.dane.gov.co/index.php/estadisticas-por-tema/demografia-y-poblacion/proyecciones-de-poblacion",
+    "formato": "XLSX",
+    "acceso": "Descarga de archivo, sin API",
+    "licencia": "por verificar",
+    "personas": "No",
+    "estado": "Candidata",
+    "probado": null,
+    "como_se_encontro": "Búsqueda web en dane.gov.co",
+    "observaciones": "Es la fuente vigente de población (F03 llega a 2020), pero viene en Excel: leerla exige openpyxl o descargar a mano. Pendiente decidir si se integra."
   }
 ]

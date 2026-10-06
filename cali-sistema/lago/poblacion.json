@@ -1,0 +1,252 @@
+{
+  "fuente": "F03",
+  "url": "https://datos.cali.gov.co/api/3/action/datastore_search?resource_id=fb8150d6-2af0-4d75-b741-33aaf871b19c&limit=100",
+  "vigencia": "2020",
+  "probado": "2026-10-05",
+  "cifras": {
+    "poblacion_ultimo_anio": 2496442,
+    "poblacion_urbana_ultimo_anio": 2459789,
+    "poblacion_rural_ultimo_anio": 36653,
+    "densidad_ultimo_anio": 44.56
+  },
+  "registros": [
+    {
+      "anio": 1987,
+      "poblacion": 1522188,
+      "poblacion_urbana": 1491779,
+      "poblacion_rural": 30409,
+      "densidad": 27.17
+    },
+    {
+      "anio": 1988,
+      "poblacion": 1572755,
+      "poblacion_urbana": 1540755,
+      "poblacion_rural": 32000,
+      "densidad": 28.07
+    },
+    {
+      "anio": 1989,
+      "poblacion": 1621948,
+      "poblacion_urbana": 1588473,
+      "poblacion_rural": 33475,
+      "densidad": 28.95
+    },
+    {
+      "anio": 1990,
+      "poblacion": 1669322,
+      "poblacion_urbana": 1634531,
+      "poblacion_rural": 34791,
+      "densidad": 29.8
+    },
+    {
+      "anio": 1991,
+      "poblacion": 1714415,
+      "poblacion_urbana": 1678514,
+      "poblacion_rural": 35901,
+      "densidad": 30.6
+    },
+    {
+      "anio": 1992,
+      "poblacion": 1756781,
+      "poblacion_urbana": 1720010,
+      "poblacion_rural": 36771,
+      "densidad": 31.36
+    },
+    {
+      "anio": 1993,
+      "poblacion": 1796111,
+      "poblacion_urbana": 1758730,
+      "poblacion_rural": 37381,
+      "densidad": 32.06
+    },
+    {
+      "anio": 1994,
+      "poblacion": 1832238,
+      "poblacion_urbana": 1794518,
+      "poblacion_rural": 37720,
+      "densidad": 32.7
+    },
+    {
+      "anio": 1995,
+      "poblacion": 1865307,
+      "poblacion_urbana": 1827483,
+      "poblacion_rural": 37824,
+      "densidad": 33.29
+    },
+    {
+      "anio": 1996,
+      "poblacion": 1895661,
+      "poblacion_urbana": 1857909,
+      "poblacion_rural": 37752,
+      "densidad": 33.84
+    },
+    {
+      "anio": 1997,
+      "poblacion": 1923705,
+      "poblacion_urbana": 1886145,
+      "poblacion_rural": 37560,
+      "densidad": 34.34
+    },
+    {
+      "anio": 1998,
+      "poblacion": 1949903,
+      "poblacion_urbana": 1912575,
+      "poblacion_rural": 37328,
+      "densidad": 34.8
+    },
+    {
+      "anio": 1999,
+      "poblacion": 1974700,
+      "poblacion_urbana": 1937583,
+      "poblacion_rural": 37117,
+      "densidad": 35.25
+    },
+    {
+      "anio": 2000,
+      "poblacion": 1998623,
+      "poblacion_urbana": 1961665,
+      "poblacion_rural": 36958,
+      "densidad": 35.67
+    },
+    {
+      "anio": 2001,
+      "poblacion": 2022178,
+      "poblacion_urbana": 1985301,
+      "poblacion_rural": 36877,
+      "densidad": 36.09
+    },
+    {
+      "anio": 2002,
+      "poblacion": 2045944,
+      "poblacion_urbana": 2009117,
+      "poblacion_rural": 36827,
+      "densidad": 36.52
+    },
+    {
+      "anio": 2003,
+      "poblacion": 2070161,
+      "poblacion_urbana": 2033363,
+      "poblacion_rural": 36798,
+      "densidad": 36.95
+    },
+    {
+      "anio": 2004,
+      "poblacion": 2094843,
+      "poblacion_urbana": 2058075,
+      "poblacion_rural": 36768,
+      "densidad": 37.39
+    },
+    {
+      "anio": 2005,
+      "poblacion": 2119843,
+      "poblacion_urbana": 2083102,
+      "poblacion_rural": 36741,
+      "densidad": 37.84
+    },
+    {
+      "anio": 2006,
+      "poblacion": 2144860,
+      "poblacion_urbana": 2108144,
+      "poblacion_rural": 36716,
+      "densidad": 38.28
+    },
+    {
+      "anio": 2007,
+      "poblacion": 2169838,
+      "poblacion_urbana": 2133143,
+      "poblacion_rural": 36695,
+      "densidad": 38.73
+    },
+    {
+      "anio": 2008,
+      "poblacion": 2194781,
+      "poblacion_urbana": 2158101,
+      "poblacion_rural": 36680,
+      "densidad": 39.17
+    },
+    {
+      "anio": 2009,
+      "poblacion": 2219720,
+      "poblacion_urbana": 2183056,
+      "poblacion_rural": 36664,
+      "densidad": 39.62
+    },
+    {
+      "anio": 2010,
+      "poblacion": 2244668,
+      "poblacion_urbana": 2208020,
+      "poblacion_rural": 36648,
+      "densidad": 40.06
+    },
+    {
+      "anio": 2011,
+      "poblacion": 2269653,
+      "poblacion_urbana": 2233016,
+      "poblacion_rural": 36637,
+      "densidad": 40.51
+    },
+    {
+      "anio": 2012,
+      "poblacion": 2294653,
+      "poblacion_urbana": 2258025,
+      "poblacion_rural": 36628,
+      "densidad": 40.96
+    },
+    {
+      "anio": 2013,
+      "poblacion": 2319684,
+      "poblacion_urbana": 2283057,
+      "poblacion_rural": 36627,
+      "densidad": 41.4
+    },
+    {
+      "anio": 2014,
+      "poblacion": 2344734,
+      "poblacion_urbana": 2308112,
+      "poblacion_rural": 36622,
+      "densidad": 41.85
+    },
+    {
+      "anio": 2015,
+      "poblacion": 2369821,
+      "poblacion_urbana": 2333203,
+      "poblacion_rural": 36618,
+      "densidad": 42.3
+    },
+    {
+      "anio": 2016,
+      "poblacion": 2394925,
+      "poblacion_urbana": 2358302,
+      "poblacion_rural": 36623,
+      "densidad": 42.75
+    },
+    {
+      "anio": 2017,
+      "poblacion": 2420114,
+      "poblacion_urbana": 2383485,
+      "poblacion_rural": 36629,
+      "densidad": 43.2
+    },
+    {
+      "anio": 2018,
+      "poblacion": 2445405,
+      "poblacion_urbana": 2408773,
+      "poblacion_rural": 36632,
+      "densidad": 43.65
+    },
+    {
+      "anio": 2019,
+      "poblacion": 2470852,
+      "poblacion_urbana": 2434211,
+      "poblacion_rural": 36641,
+      "densidad": 44.1
+    },
+    {
+      "anio": 2020,
+      "poblacion": 2496442,
+      "poblacion_urbana": 2459789,
+      "poblacion_rural": 36653,
+      "densidad": 44.56
+    }
+  ]
+}

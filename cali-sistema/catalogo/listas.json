@@ -6,6 +6,6 @@
     "Departamento Administrativo Nacional de Estadística (DANE)",
     "Alcaldía de Santiago de Cali"
   ],
-  "licencias": ["CC0", "CC BY 4.0", "CC BY-SA 4.0", "ODbL", "no declara"],
+  "licencias": ["CC0", "CC BY 4.0", "CC BY-SA 4.0", "CC BY-SA (sin versión declarada)", "ODbL", "no declara", "por verificar"],
   "estados": ["Integrada al lago", "Candidata", "No responde", "No existe", "Descartada"]
 }

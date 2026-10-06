@@ -4,7 +4,12 @@ import sys
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
-SCRIPTS = ["pull_escucha.py", "pull_desempeno.py"]  # agreguen aquí cada script nuevo
+SCRIPTS = [  # agreguen aquí cada script nuevo
+    "pull_escucha.py",
+    "pull_desempeno.py",
+    "pull_poblacion.py",
+    "pull_comunas.py",
+]
 
 fallos = 0
 for s in SCRIPTS:
