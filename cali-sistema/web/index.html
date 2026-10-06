@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cerebro Cali · sistema de información</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+<style>
+  :root {
+    --noche: #0f1a1e;        /* fondo: noche caleña */
+    --monte: #16252b;        /* superficies */
+    --borde: #24383f;
+    --tinta: #e6efec;
+    --gris: #93a7a8;
+    --mango: #f2b544;        /* acento: cifras y foco */
+    --saman: #7ccf9a;        /* árboles, estado bueno */
+    --cholado: #ef6f5e;      /* alertas, huecos */
+    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --texto: "Barlow", system-ui, sans-serif;
+    --ancho-lateral: 264px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--noche); color: var(--tinta);
+    font: 400 17px/1.55 var(--texto);
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  a { color: var(--mango); }
+  :focus-visible { outline: 2px solid var(--mango); outline-offset: 2px; }
+
+  /* ---------- barra lateral ---------- */
+  .lateral {
+    position: fixed; inset: 0 auto 0 0; width: var(--ancho-lateral);
+    background: var(--monte); border-right: 1px solid var(--borde);
+    display: flex; flex-direction: column; padding: 28px 18px 18px; overflow-y: auto; z-index: 20;
+  }
+  .marca { font: 700 30px/1 var(--display); letter-spacing: .01em; margin: 0; }
+  .marca-sub { color: var(--gris); font-size: 14px; margin: 6px 0 26px; line-height: 1.35; }
+  .menu { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .menu a {
+    display: flex; gap: 12px; align-items: center; padding: 10px 12px; border-radius: 10px;
+    color: var(--tinta); text-decoration: none; font-weight: 500;
+  }
+  .menu a:hover { background: #1d3038; }
+  .menu a[aria-current="page"] { background: #233a33; color: var(--saman); box-shadow: inset 3px 0 0 var(--saman); }
+  .menu svg { width: 18px; height: 18px; flex: none; }
+  .estado-lago { margin-top: auto; padding-top: 18px; color: var(--gris); font-size: 14px; }
+  .estado-lago b { color: var(--tinta); font-weight: 600; }
+
+  .barra-movil { display: none; }
+
+  /* ---------- contenido ---------- */
+  main { margin-left: var(--ancho-lateral); padding: 44px clamp(20px, 5vw, 64px) 0; max-width: 1180px; }
+  .vista { display: none; }
+  .vista.activa { display: block; }
+  h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1; margin: 0; }
+  .titular { font-size: clamp(54px, 9vw, 112px); letter-spacing: -.01em; }
+  .titular span { display: block; color: var(--gris); }
+  h2 { font-size: clamp(40px, 6vw, 64px); margin-bottom: 10px; }
+  h3 { font-size: 26px; margin-bottom: 12px; }
+  .lead { max-width: 68ch; font-size: 19px; color: #cfdcd8; margin: 22px 0 0; }
+  .intro { max-width: 66ch; color: var(--gris); margin: 0 0 28px; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 26px 0 0; padding: 0; list-style: none; }
+  .chips li { border: 1px solid var(--borde); border-radius: 999px; padding: 5px 13px; font-size: 14px; color: #c4d3cf; }
+  .chips li.ok::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--saman); margin-right: 8px; vertical-align: middle; }
+
+  .bloque { background: var(--monte); border: 1px solid var(--borde); border-radius: 18px; padding: 24px; margin-bottom: 20px; }
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .rejilla .bloque { margin: 0; }
+  .etiqueta { color: var(--gris); font-size: 15px; margin: 0 0 6px; }
+
+  /* preguntas de la portada */
+  .preguntas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 32px; margin: 46px 0 30px; border-top: 1px solid var(--borde); }
+  .pregunta { display: block; padding: 22px 20px 22px 0; border-bottom: 1px solid var(--borde); color: var(--tinta); text-decoration: none; }
+  .pregunta:hover h3 { color: var(--mango); }
+  .pregunta h3 { font-size: 28px; margin-bottom: 10px; }
+  .pregunta p { margin: 0; color: var(--gris); }
+
+  /* ---------- cifra con trazabilidad ---------- */
+  .cifra { color: inherit; text-decoration: none; cursor: pointer; border-bottom: 1px dashed #5c7376; }
+  .cifra:hover { border-bottom-color: var(--mango); }
+  .cifra .v { color: var(--mango); font-weight: 600; }
+  .cifra .vig { color: var(--gris); font-weight: 400; }
+  .cifra .i { display: inline-block; width: 15px; height: 15px; margin-left: 4px; vertical-align: -2px; color: var(--gris); }
+  .grande .cifra { border-bottom: 0; display: block; }
+  .grande .cifra .sep { display: none; }
+  .grande .cifra .v { font: 700 clamp(38px, 4.4vw, 58px)/1 var(--display); display: block; margin-bottom: 8px; overflow-wrap: anywhere; }
+  .tabla-caja .cifra { border-bottom-color: transparent; }
+  .tabla-caja .cifra .v { color: var(--tinta); font-weight: 500; }
+  .tabla-caja .cifra .i { opacity: .45; }
+  .tabla-caja .cifra:hover .v { color: var(--mango); }
+  .grande .cifra .vig { font-size: 15px; }
+
+  /* ---------- avisos ---------- */
+  .aviso { border-left: 3px solid var(--cholado); background: #2a2224; padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 0 0 20px; color: #f1d6d1; max-width: 80ch; }
+  .nota { border-left: 3px solid var(--borde); padding: 4px 0 4px 14px; color: var(--gris); margin: 14px 0 0; max-width: 80ch; font-size: 15px; }
+  .error { border: 1px solid var(--cholado); color: #f6c9c1; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; }
+
+  /* ---------- gráficas ---------- */
+  .grafica svg { width: 100%; height: auto; display: block; }
+  .grafica text { fill: var(--gris); font: 13px var(--texto); }
+  .leyenda { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; color: var(--gris); margin-top: 10px; }
+  .leyenda i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+  /* ---------- mapa ---------- */
+  .mapa-caja { position: relative; height: min(68vh, 560px); border-radius: 18px; overflow: hidden; border: 1px solid var(--borde); background: #0c1518; }
+  #mapa { position: absolute; inset: 0; }
+  .selector { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 14px; }
+  .selector button { font: 500 15px var(--texto); color: var(--tinta); background: var(--monte); border: 1px solid var(--borde); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+  .selector button[aria-pressed="true"] { background: var(--saman); color: #0d2016; border-color: var(--saman); }
+  .escala { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--gris); margin-top: 10px; }
+  .escala .barra { height: 10px; flex: 0 1 240px; border-radius: 5px; }
+  .ficha-comuna { position: absolute; left: 14px; bottom: 14px; max-width: 320px; background: rgba(22,37,43,.96); border: 1px solid var(--borde); border-radius: 14px; padding: 16px; display: none; }
+  .ficha-comuna.visible { display: block; }
+  .ficha-comuna h3 { font-size: 28px; }
+  .ficha-comuna dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; margin: 0; font-size: 15px; }
+  .ficha-comuna dt { color: var(--gris); }
+  .ficha-comuna dd { margin: 0; }
+  .cerrar-ficha { position: absolute; top: 8px; right: 10px; background: none; border: 0; color: var(--gris); font-size: 22px; cursor: pointer; }
+
+  /* ---------- tablas ---------- */
+  .tabla-caja { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { color: var(--gris); font-weight: 500; white-space: nowrap; }
+  th button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+  th button[aria-sort]::after { content: " ↕"; opacity: .5; }
+  th button[aria-sort="ascending"]::after { content: " ↑"; opacity: 1; }
+  th button[aria-sort="descending"]::after { content: " ↓"; opacity: 1; }
+  td.num { font-variant-numeric: tabular-nums; }
+  .estado { display: inline-block; border-radius: 999px; padding: 2px 10px; font-size: 13px; white-space: nowrap; }
+  .estado.integrada { background: #1f3b2d; color: var(--saman); }
+  .estado.candidata { background: #3a3220; color: var(--mango); }
+  .estado.caida { background: #3b2320; color: var(--cholado); }
+
+  .huecos { list-style: none; padding: 0; margin: 0; }
+  .huecos li { padding: 16px 0; border-bottom: 1px solid var(--borde); }
+  .huecos b { display: block; font-size: 18px; margin-bottom: 4px; }
+  .huecos span { color: var(--gris); }
+
+  /* ---------- panel de trazabilidad ---------- */
+  .panel-fondo { position: fixed; inset: 0; background: rgba(5,10,12,.55); z-index: 40; display: none; }
+  .panel {
+    position: fixed; top: 0; right: 0; bottom: 0; width: min(440px, 100%); z-index: 50;
+    background: var(--monte); border-left: 1px solid var(--borde);
+    padding: calc(28px + env(safe-area-inset-top, 0px)) 26px 26px; overflow-y: auto;
+    transform: translateX(100%); transition: transform .22s ease;
+  }
+  .panel.abierto { transform: none; }
+  .panel-fondo.abierto { display: block; }
+  .panel h3 { font-size: 30px; padding-right: 30px; }
+  .panel dl { margin: 18px 0 0; }
+  .panel dt { color: var(--gris); font-size: 14px; margin-top: 14px; }
+  .panel dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+  .panel .formula { font-family: ui-monospace, Menlo, monospace; font-size: 14px; background: #0f1a1e; padding: 10px 12px; border-radius: 8px; margin-top: 4px; }
+  .panel .cerrar { position: absolute; top: calc(16px + env(safe-area-inset-top, 0px)); right: 16px; background: none; border: 0; color: var(--tinta); font-size: 28px; cursor: pointer; line-height: 1; }
+
+  footer { margin: 60px 0 0; padding: 26px 0 40px; border-top: 1px solid var(--borde); color: var(--gris); font-size: 14px; }
+  footer p { margin: 0 0 4px; }
+
+  /* ---------- celular ---------- */
+  @media (max-width: 860px) {
+    .barra-movil {
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30;
+      background: var(--monte); border-bottom: 1px solid var(--borde); padding: 10px 16px;
+    }
+    .barra-movil .marca { font-size: 24px; }
+    .barra-movil button { background: none; border: 1px solid var(--borde); color: var(--tinta); border-radius: 10px; padding: 7px 12px; font: 500 15px var(--texto); }
+    .lateral { transform: translateX(-100%); transition: transform .22s ease; width: min(300px, 86vw); padding-top: calc(28px + env(safe-area-inset-top, 0px)); }
+    .lateral.abierta { transform: none; }
+    main { margin-left: 0; padding-top: 26px; }
+    .ficha-comuna { left: 8px; right: 8px; bottom: 8px; max-width: none; }
+    .preguntas { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .panel, .lateral { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="barra-movil">
+  <p class="marca">Cerebro Cali</p>
+  <button id="abrir-menu" aria-controls="lateral" aria-expanded="false">Menú</button>
+</div>
+
+<nav class="lateral" id="lateral" aria-label="Secciones">
+  <p class="marca">Cerebro Cali</p>
+  <p class="marca-sub">Santiago de Cali, Colombia<br>DIVIPOLA 76001</p>
+  <ul class="menu">
+    <li><a href="#panorama"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/></svg>Panorama</a></li>
+    <li><a href="#gente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.4.2 4 1.8 4.5 4.5"/></svg>Gente</a></li>
+    <li><a href="#gestion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>Gestión municipal</a></li>
+    <li><a href="#territorio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3c3 3.5 5 6.5 5 9a5 5 0 0 1-10 0c0-2.5 2-5.5 5-9z"/><path d="M12 17v4"/></svg>Árboles por comuna</a></li>
+    <li><a href="#escucha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Interés en Cali</a></li>
+    <li><a href="#no-sabe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17.5v.01"/></svg>Lo que no sabemos</a></li>
+    <li><a href="#fuentes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Fuentes y método</a></li>
+  </ul>
+  <p class="estado-lago" id="estado-lago">Cargando el lago…</p>
+</nav>
+
+<main id="contenido">
+
+  <!-- ================= PANORAMA ================= -->
+  <section class="vista" id="v-panorama" aria-labelledby="t-panorama">
+    <h1 class="titular" id="t-panorama">Entiende Cali.<span>Decide con evidencia.</span></h1>
+    <p class="lead" id="resumen">Cargando los datos del lago…</p>
+    <ul class="chips" id="chips"></ul>
+
+    <div class="preguntas">
+      <a class="pregunta" href="#gente"><h3>¿Cuánta gente vive en Cali?</h3><p id="p-gente">Población total, urbana y rural.</p></a>
+      <a class="pregunta" href="#gestion"><h3>¿Qué tan bien gestiona el municipio?</h3><p id="p-gestion">Medición de Desempeño Municipal del DNP.</p></a>
+      <a class="pregunta" href="#territorio"><h3>¿Cómo están los árboles en cada comuna?</h3><p id="p-territorio">Censo arbóreo en el mapa de las comunas.</p></a>
+      <a class="pregunta" href="#escucha"><h3>¿Cuánto interés despierta Cali afuera?</h3><p id="p-escucha">Visitas mensuales al artículo de Cali en Wikipedia.</p></a>
+    </div>
+    <p class="nota">Toca cualquier cifra subrayada para ver de dónde salió, qué periodo cubre y cuándo se probó la fuente.</p>
+  </section>
+
+  <!-- ================= GENTE ================= -->
+  <section class="vista" id="v-gente" aria-labelledby="t-gente">
+    <h2 id="t-gente">¿Cuánta gente vive en Cali?</h2>
+    <p class="intro">Población total del distrito y su reparto entre la zona urbana (comunas) y la rural (corregimientos).</p>
+    <div id="gente-contenido"></div>
+  </section>
+
+  <!-- ================= GESTIÓN ================= -->
+  <section class="vista" id="v-gestion" aria-labelledby="t-gestion">
+    <h2 id="t-gestion">¿Qué tan bien gestiona el municipio?</h2>
+    <p class="intro">La Medición de Desempeño Municipal (MDM) del Departamento Nacional de Planeación califica de 0 a 100 la gestión y los resultados de cada municipio del país.</p>
+    <div id="gestion-contenido"></div>
+  </section>
+
+  <!-- ================= TERRITORIO ================= -->
+  <section class="vista" id="v-territorio" aria-labelledby="t-territorio">
+    <h2 id="t-territorio">¿Cómo están los árboles en cada comuna?</h2>
+    <p class="intro">El censo arbóreo de la Alcaldía, comuna por comuna. Toca una comuna en el mapa para ver su detalle.</p>
+    <div id="territorio-contenido"></div>
+  </section>
+
+  <!-- ================= ESCUCHA ================= -->
+  <section class="vista" id="v-escucha" aria-labelledby="t-escucha">
+    <h2 id="t-escucha">¿Cuánto interés despierta Cali afuera?</h2>
+    <p class="intro">Cuántas personas abren cada mes el artículo de Cali en la Wikipedia en español. Es una señal de interés, no una medida de turismo ni de reputación.</p>
+    <div id="escucha-contenido"></div>
+  </section>
+
+  <!-- ================= LO QUE NO SABEMOS ================= -->
+  <section class="vista" id="v-no-sabe" aria-labelledby="t-no-sabe">
+    <h2 id="t-no-sabe">Lo que el sistema no sabe, lo dice</h2>
+    <p class="intro">Preguntas que un concejal haría y que hoy no se pueden responder con datos abiertos de Cali, y fuentes que buscamos pero no entraron al sistema.</p>
+    <div class="bloque"><h3>Huecos</h3><ul class="huecos" id="huecos"></ul></div>
+    <div class="bloque"><h3>Fuentes que no están integradas</h3><ul class="huecos" id="no-integradas"></ul></div>
+  </section>
+
+  <!-- ================= FUENTES ================= -->
+  <section class="vista" id="v-fuentes" aria-labelledby="t-fuentes">
+    <h2 id="t-fuentes">Fuentes y método</h2>
+    <p class="intro">Todas las fuentes que rastreamos, incluidas las que no entraron, con su licencia, su estado y la fecha en que las probamos.</p>
+    <div class="bloque tabla-caja" id="tabla-fuentes"></div>
+    <div class="bloque">
+      <h3>Cómo se construye</h3>
+      <p>Un script de Python por fuente baja los datos de cada portal, los limpia y los guarda en un lago de archivos JSON. Cada archivo lleva pegada su fuente, la vigencia del dato y la fecha en que la fuente respondió. Antes de publicar, un script de verificación revisa el catálogo, la procedencia de cada cifra, que los valores estén en rangos con sentido y que el mapa caiga dentro de Cali; con una sola falla, no se publica.</p>
+      <p>Esta página no tiene ninguna cifra escrita a mano: las lee del lago cada vez que se abre. Todo el código y los datos están en el <a id="enlace-repo" href="#">repositorio del proyecto</a>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Grupo: Sara Isabel Vásquez (datos) y Alejandro Rendón (vistas)</p>
+    <p>Tópicos de Sistemas de Información, Universidad EAFIT</p>
+    <p><a id="enlace-repo-pie" href="#">Repositorio del proyecto</a></p>
+  </footer>
+</main>
+
+<div class="panel-fondo" id="panel-fondo"></div>
+<aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-titulo" aria-hidden="true">
+  <button class="cerrar" id="cerrar-panel" aria-label="Cerrar">×</button>
+  <h3 id="panel-titulo"></h3>
+  <dl id="panel-cuerpo"></dl>
+</aside>
+
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script>
+/* =====================================================================
+   Configuración: de dónde se leen los datos
+   ===================================================================== */
+const REPO = "sara-ivasquez/cali-sistema";
+const RAMA = "main";
+const PARAM_BASE = new URLSearchParams(location.search).get("base"); // solo para pruebas locales
+const BASES = PARAM_BASE ? [PARAM_BASE] : [`https://raw.githubusercontent.com/${REPO}/${RAMA}/`, "../", "./"];
+const ARCHIVOS = {
+  poblacion: "lago/poblacion.json",
+  desempeno: "lago/desempeno.json",
+  escucha: "lago/escucha.json",
+  territorio: "lago/territorio.json",
+  comunas: "territorio/comunas.geojson",
+  catalogo: "catalogo/fuentes.json",
+};
+const FUENTE_DE = { poblacion: "F03", desempeno: "F02", escucha: "F01", territorio: "F04", comunas: "F04" };
+
+/* =====================================================================
+   Formato colombiano
+   ===================================================================== */
+const fmtEntero = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 });
+const fmtDecimal = new Intl.NumberFormat("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmtUno = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 1 });
+const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+function fmtPeriodo(p) { const [a, m] = String(p).split("-"); return m ? `${MESES[+m - 1]} de ${a}` : String(p); }
+function fmtFecha(f) {
+  if (!f) return "sin fecha";
+  const [a, m, d] = f.split("-"); return `${+d} de ${MESES[+m - 1]} de ${a}`;
+}
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+/* =====================================================================
+   Métricas: cada métrica derivada se define UNA vez y todas las vistas la usan
+   ===================================================================== */
+const METRICAS = {
+  arboles_km2: {
+    nombre: "Árboles por km²",
+    formula: "no_arboles / (area_m2 / 1.000.000)",
+    calcular: p => (p.no_arboles != null && p.area_m2 > 0) ? p.no_arboles / (p.area_m2 / 1e6) : null,
+    formato: v => fmtEntero.format(v),
+  },
+  arboles: {
+    nombre: "Árboles censados",
+    formula: "no_arboles",
+    calcular: p => p.no_arboles ?? null,
+    formato: v => fmtEntero.format(v),
+  },
+  secos_muertos: {
+    nombre: "Árboles secos o muertos",
+    formula: "arbol_seco + arb_muerto",
+    calcular: p => (p.arbol_seco != null && p.arb_muerto != null) ? p.arbol_seco + p.arb_muerto : null,
+    formato: v => fmtEntero.format(v),
+  },
+  area_km2: {
+    nombre: "Área",
+    formula: "area_m2 / 1.000.000",
+    calcular: p => p.area_m2 != null ? p.area_m2 / 1e6 : null,
+    formato: v => fmtUno.format(v) + " km²",
+  },
+  pct_rural: {
+    nombre: "Porcentaje de población rural",
+    formula: "poblacion_rural / poblacion × 100",
+    calcular: r => (r.poblacion_rural != null && r.poblacion > 0) ? r.poblacion_rural / r.poblacion * 100 : null,
+    formato: v => fmtUno.format(v) + " %",
+  },
+  variacion_pob: {
+    nombre: "Variación de la población",
+    formula: "(poblacion final − poblacion inicial) / poblacion inicial × 100",
+    calcular: (ini, fin) => (ini && fin && ini.poblacion > 0) ? (fin.poblacion - ini.poblacion) / ini.poblacion * 100 : null,
+    formato: v => (v >= 0 ? "+" : "") + fmtUno.format(v) + " %",
+  },
+};
+
+/* =====================================================================
+   Carga del lago
+   ===================================================================== */
+const D = {};          // datos cargados
+const ERRORES = {};    // archivos que no cargaron
+let BASE_USADA = null;
+
+async function traer(ruta) {
+  const bases = BASE_USADA ? [BASE_USADA] : BASES;
+  let ultimo;
+  for (const b of bases) {
+    try {
+      const r = await fetch(b + ruta, { cache: "no-cache" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      BASE_USADA = BASE_USADA || b;
+      return j;
+    } catch (e) { ultimo = new Error(`${b + ruta} → ${e.message}`); }
+  }
+  throw ultimo;
+}
+
+async function cargarTodo() {
+  // el catálogo primero, para fijar de dónde se leen los demás
+  try { D.catalogo = await traer(ARCHIVOS.catalogo); } catch (e) { ERRORES.catalogo = e.message; }
+  await Promise.all(Object.entries(ARCHIVOS).filter(([k]) => k !== "catalogo").map(async ([k, ruta]) => {
+    try { D[k] = await traer(ruta); } catch (e) { ERRORES[k] = e.message; }
+  }));
+}
+
+function fuente(id) { return (D.catalogo || []).find(f => f.id === id) || null; }
+
+/* =====================================================================
+   Componente de cifra con trazabilidad
+   ===================================================================== */
+const TRAZAS = [];
+const ICONO_I = '<svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>';
+
+/** archivo: clave en D (poblacion, desempeno…); texto: valor ya formateado; extra: { metrica, detalle } */
+function cifra(archivo, texto, vigenciaTexto, extra = {}) {
+  const id = TRAZAS.push({ archivo, texto, vigenciaTexto, ...extra }) - 1;
+  const vig = vigenciaTexto ? `<span class="vig"><span class="sep"> · </span>${esc(vigenciaTexto)}</span>` : "";
+  return `<a class="cifra" href="#" role="button" data-traza="${id}" aria-label="${esc(texto)}${vigenciaTexto ? ", " + esc(vigenciaTexto) : ""}. Ver de dónde sale"><span class="v">${esc(texto)}</span>${vig}${ICONO_I}</a>`;
+}
+
+function abrirTraza(t) {
+  const datos = D[t.archivo] || {};
+  const f = fuente(datos.fuente || FUENTE_DE[t.archivo]);
+  const filas = [];
+  filas.push(["Cifra", `${esc(t.texto)}${t.detalle ? " — " + esc(t.detalle) : ""}`]);
+  if (t.metrica) filas.push(["Cómo se calcula", `${esc(METRICAS[t.metrica].nombre)}<div class="formula">${esc(METRICAS[t.metrica].formula)}</div>`]);
+  if (f) {
+    filas.push(["Fuente", `${esc(f.id)} · ${esc(f.nombre)}`]);
+    filas.push(["Entidad", esc(f.entidad)]);
+    filas.push(["Licencia", f.licencia_url ? `<a href="${esc(f.licencia_url)}" target="_blank" rel="noopener">${esc(f.licencia)}</a>` : esc(f.licencia)]);
+  }
+  filas.push(["Vigencia del dato", esc(datos.vigencia || "sin dato")]);
+  filas.push(["Fuente probada el", esc(fmtFecha(datos.probado || (f && f.probado)))]);
+  if (datos.capa) filas.push(["Capa", esc(datos.capa)]);
+  if (f && f.observaciones) filas.push(["Observaciones", esc(f.observaciones)]);
+  const url = datos.url || (f && f.url);
+  if (url) filas.push(["Origen", `<a href="${esc(url)}" target="_blank" rel="noopener">Abrir la fuente original</a>`]);
+  if (!f) filas.push(["Aviso", "Esta fuente no aparece en el catálogo."]);
+
+  document.getElementById("panel-titulo").textContent = "De dónde sale esta cifra";
+  document.getElementById("panel-cuerpo").innerHTML = filas.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
+  abrirPanel();
+}
+
+let focoAntes = null;
+function abrirPanel() {
+  focoAntes = document.activeElement;
+  const p = document.getElementById("panel");
+  p.classList.add("abierto"); p.setAttribute("aria-hidden", "false");
+  document.getElementById("panel-fondo").classList.add("abierto");
+  document.getElementById("cerrar-panel").focus();
+}
+function cerrarPanel() {
+  const p = document.getElementById("panel");
+  p.classList.remove("abierto"); p.setAttribute("aria-hidden", "true");
+  document.getElementById("panel-fondo").classList.remove("abierto");
+  if (focoAntes) focoAntes.focus();
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-traza]");
+  if (b) { e.preventDefault(); abrirTraza(TRAZAS[+b.dataset.traza]); }
+});
+document.getElementById("cerrar-panel").addEventListener("click", cerrarPanel);
+document.getElementById("panel-fondo").addEventListener("click", cerrarPanel);
+document.addEventListener("keydown", e => { if (e.key === "Escape") { cerrarPanel(); cerrarMenu(); } });
+
+function errorDe(archivo) {
+  const id = FUENTE_DE[archivo];
+  return `<div class="error" role="alert">No se pudo cargar la fuente ${esc(id)} (${esc(ARCHIVOS[archivo])}): ${esc(ERRORES[archivo] || "sin datos")}. Esta sección no muestra cifras hasta que el archivo esté disponible en el repositorio.</div>`;
+}
+
+/* =====================================================================
+   Gráficas en SVG (sin bibliotecas)
+   ===================================================================== */
+function escalaLineal(d0, d1, r0, r1) { return v => r0 + (v - d0) / ((d1 - d0) || 1) * (r1 - r0); }
+function redondearArriba(v) { const p = Math.pow(10, Math.floor(Math.log10(v || 1))); return Math.ceil(v / p) * p; }
+
+function graficaLineas({ series, etiquetas, yMin = 0, yMax, formatoY, alto = 300, etiquetaX = i => etiquetas[i], cadaX = 1 }) {
+  const W = 760, H = alto, m = { t: 16, r: 18, b: 34, l: 70 };
+  const todos = series.flatMap(s => s.valores).filter(v => v != null);
+  const max = yMax ?? redondearArriba(Math.max(...todos));
+  const x = escalaLineal(0, etiquetas.length - 1, m.l, W - m.r);
+  const y = escalaLineal(yMin, max, H - m.b, m.t);
+  let g = "";
+  for (let k = 0; k <= 4; k++) {
+    const v = yMin + (max - yMin) * k / 4, yy = y(v);
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}" stroke="#24383f"/><text x="${m.l - 10}" y="${yy + 4}" text-anchor="end">${formatoY(v)}</text>`;
+  }
+  etiquetas.forEach((_, i) => { if (i % cadaX === 0 || i === etiquetas.length - 1) g += `<text x="${x(i)}" y="${H - 10}" text-anchor="middle">${esc(etiquetaX(i))}</text>`; });
+  for (const s of series) {
+    const pts = s.valores.map((v, i) => v == null ? null : `${x(i).toFixed(1)},${y(v).toFixed(1)}`).filter(Boolean);
+    g += `<polyline points="${pts.join(" ")}" fill="none" stroke="${s.color}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;
+    if (s.puntos) s.valores.forEach((v, i) => { if (v != null) g += `<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="${s.color}"><title>${esc(etiquetas[i])}: ${esc(s.formato(v))}</title></circle>`; });
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(series.map(s => s.nombre).join(", "))}">${g}</svg>`;
+}
+
+function graficaBarras({ valores, etiquetas, formatoY, color, alto = 300, cadaX = 1, etiquetaX = i => etiquetas[i], formato }) {
+  const W = 760, H = alto, m = { t: 16, r: 12, b: 34, l: 70 };
+  const max = redondearArriba(Math.max(...valores));
+  const ancho = (W - m.l - m.r) / valores.length;
+  const y = escalaLineal(0, max, H - m.b, m.t);
+  let g = "";
+  for (let k = 0; k <= 4; k++) {
+    const v = max * k / 4, yy = y(v);
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}" stroke="#24383f"/><text x="${m.l - 10}" y="${yy + 4}" text-anchor="end">${formatoY(v)}</text>`;
+  }
+  valores.forEach((v, i) => {
+    const xx = m.l + i * ancho + ancho * 0.15, yy = y(v);
+    g += `<rect x="${xx}" y="${yy}" width="${ancho * 0.7}" height="${H - m.b - yy}" rx="3" fill="${color}"><title>${esc(etiquetas[i])}: ${esc(formato(v))}</title></rect>`;
+    if (i % cadaX === 0 || i === valores.length - 1) g += `<text x="${xx + ancho * 0.35}" y="${H - 10}" text-anchor="middle">${esc(etiquetaX(i))}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfica de barras">${g}</svg>`;
+}
+
+function compacto(v) {
+  if (v >= 1e6) return fmtUno.format(v / 1e6) + " M";
+  if (v >= 1e3) return fmtUno.format(v / 1e3) + " mil";
+  return fmtEntero.format(v);
+}
+
+/* =====================================================================
+   Vistas
+   ===================================================================== */
+function ultimo(arr) { return arr[arr.length - 1]; }
+
+function vistaPanorama() {
+  const frases = [];
+  const p = D.poblacion, m = D.desempeno, t = D.territorio, e = D.escucha;
+  if (p) {
+    const u = ultimo(p.registros);
+    let s = `Cali tenía ${cifra("poblacion", fmtEntero.format(u.poblacion) + " habitantes", "proyección " + p.vigencia)}`;
+    const pr = METRICAS.pct_rural.calcular(u);
+    if (pr != null) s += `, de los cuales el ${cifra("poblacion", METRICAS.pct_rural.formato(pr), p.vigencia, { metrica: "pct_rural" })} vivía en la zona rural`;
+    frases.push(s + ".");
+  }
+  if (t) frases.push(`Su zona urbana se divide en ${cifra("territorio", fmtEntero.format(t.cifras.numero_comunas) + " comunas", null)}, cada una con su censo arbóreo.`);
+  if (m) frases.push(`El Departamento Nacional de Planeación le dio ${cifra("desempeno", fmtDecimal.format(m.cifras.mdm_ultimo_anio) + " puntos de 100", m.vigencia)} en desempeño municipal, la última medición publicada en datos abiertos.`);
+  if (e) frases.push(`Su artículo en Wikipedia recibió ${cifra("escucha", fmtEntero.format(e.cifras.vistas_ultimo_mes) + " visitas", fmtPeriodo(e.vigencia))}.`);
+  document.getElementById("resumen").innerHTML = frases.length ? frases.join(" ")
+    : `No se pudo cargar ningún archivo del lago. Se intentó leer desde: ${BASES.map(esc).join(" , ")}. Error del primer archivo: ${esc(Object.values(ERRORES)[0] || "desconocido")}.`;
+
+  // chips calculados
+  const cat = D.catalogo || [];
+  const fechas = Object.keys(FUENTE_DE).map(k => D[k] && D[k].probado).filter(Boolean).sort();
+  const integradas = cat.filter(f => f.estado === "Integrada al lago").length;
+  const chips = [];
+  if (fechas.length) chips.push(`<li class="ok">lago probado ${esc(fmtFecha(ultimo(fechas)))}</li>`);
+  if (cat.length) chips.push(`<li>${fmtEntero.format(cat.length)} fuentes catalogadas</li>`, `<li>${fmtEntero.format(integradas)} integradas</li>`);
+  const fallidos = Object.keys(ERRORES).length;
+  if (fallidos) chips.push(`<li>${fmtEntero.format(fallidos)} archivos sin cargar</li>`);
+  document.getElementById("chips").innerHTML = chips.join("");
+  document.getElementById("estado-lago").innerHTML = cat.length
+    ? `lago: <b>${fmtEntero.format(integradas)}/${fmtEntero.format(cat.length)}</b> fuentes integradas`
+    : "El catálogo no cargó.";
+}
+
+function vistaGente() {
+  const caja = document.getElementById("gente-contenido");
+  const p = D.poblacion;
+  if (!p) { caja.innerHTML = errorDe("poblacion"); return; }
+  const r = p.registros, u = ultimo(r), ini = r[0];
+  const pr = METRICAS.pct_rural.calcular(u);
+  const vari = METRICAS.variacion_pob.calcular(ini, u);
+  caja.innerHTML = `
+    <p class="aviso">La serie oficial abierta termina en ${esc(p.vigencia)}. La proyección vigente del DANE existe, pero solo se publica en Excel; por eso no está integrada todavía.</p>
+    <div class="rejilla">
+      <div class="bloque grande"><p class="etiqueta">Población total</p>${cifra("poblacion", fmtEntero.format(u.poblacion), "proyección " + p.vigencia)}</div>
+      ${u.poblacion_urbana != null ? `<div class="bloque grande"><p class="etiqueta">Zona urbana (comunas)</p>${cifra("poblacion", fmtEntero.format(u.poblacion_urbana), p.vigencia)}</div>` : ""}
+      ${u.poblacion_rural != null ? `<div class="bloque grande"><p class="etiqueta">Zona rural (corregimientos)</p>${cifra("poblacion", fmtEntero.format(u.poblacion_rural), p.vigencia)}</div>` : ""}
+      ${u.densidad != null ? `<div class="bloque grande"><p class="etiqueta">Densidad bruta, habitantes por km²</p>${cifra("poblacion", fmtEntero.format(u.densidad), p.vigencia, { detalle: "densidad del total del distrito según la fuente" })}</div>` : ""}
+    </div>
+    <div class="bloque grafica">
+      <h3>Población de ${esc(ini.anio)} a ${esc(u.anio)}</h3>
+      ${graficaLineas({
+        series: [{ nombre: "Población total", valores: r.map(x => x.poblacion), color: "#f2b544", formato: v => fmtEntero.format(v) }],
+        etiquetas: r.map(x => String(x.anio)), formatoY: compacto, cadaX: 5,
+      })}
+      <p class="nota">Entre ${esc(ini.anio)} y ${esc(u.anio)} la población cambió ${cifra("poblacion", METRICAS.variacion_pob.formato(vari), `${ini.anio}–${u.anio}`, { metrica: "variacion_pob" })}. Según la descripción de la fuente, los primeros años de la serie son estimaciones y los más recientes, proyecciones.</p>
+    </div>
+    ${u.poblacion_rural != null ? `<div class="bloque grafica">
+      <h3>Población rural (corregimientos)</h3>
+      ${graficaLineas({
+        series: [{ nombre: "Población rural", valores: r.map(x => x.poblacion_rural), color: "#7ccf9a", formato: v => fmtEntero.format(v) }],
+        etiquetas: r.map(x => String(x.anio)), formatoY: compacto, cadaX: 5,
+      })}
+      <p class="nota">En ${esc(u.anio)}, la zona rural tenía el ${cifra("poblacion", METRICAS.pct_rural.formato(pr), u.anio, { metrica: "pct_rural" })} de la población.</p>
+    </div>` : ""}`;
+}
+
+function vistaGestion() {
+  const caja = document.getElementById("gestion-contenido");
+  const m = D.desempeno;
+  if (!m) { caja.innerHTML = errorDe("desempeno"); return; }
+  const r = m.registros, u = ultimo(r);
+  const f = fuente("F02");
+  caja.innerHTML = `
+    <p class="aviso">La serie publicada en datos abiertos termina en ${esc(m.vigencia)}.${f && f.observaciones ? " " + esc(f.observaciones) : ""}</p>
+    <div class="rejilla">
+      <div class="bloque grande"><p class="etiqueta">Puntaje MDM más reciente</p>${cifra("desempeno", fmtDecimal.format(u.mdm) + " de 100", m.vigencia)}</div>
+      <div class="bloque grande"><p class="etiqueta">Años con medición</p>${cifra("desempeno", fmtEntero.format(r.length) + " años", `${r[0].anio}–${u.anio}`)}</div>
+    </div>
+    <div class="bloque grafica">
+      <h3>Puntaje por año</h3>
+      ${graficaLineas({
+        series: [{ nombre: "MDM", valores: r.map(x => x.mdm), color: "#f2b544", puntos: true, formato: v => fmtDecimal.format(v) }],
+        etiquetas: r.map(x => String(x.anio)), yMin: 0, yMax: 100, formatoY: v => fmtEntero.format(v),
+      })}
+      <div class="tabla-caja"><table><thead><tr><th>Año</th><th>Puntaje</th></tr></thead><tbody>
+        ${r.map(x => `<tr><td>${esc(x.anio)}</td><td class="num">${cifra("desempeno", fmtDecimal.format(x.mdm), String(x.anio))}</td></tr>`).join("")}
+      </tbody></table></div>
+      <p class="nota">Los cambios de un año a otro pueden deberse a ajustes en la metodología del DNP. No se leen como mejor o peor gestión sin revisar la ficha técnica.</p>
+    </div>`;
+}
+
+let mapa = null, metricaMapa = "arboles_km2";
+const PALETA = ["#1c3328", "#24543a", "#2f7a4c", "#4ea36a", "#7ccf9a", "#c3efcf"];
+
+function vistaTerritorio() {
+  const caja = document.getElementById("territorio-contenido");
+  const geo = D.comunas;
+  if (!geo) { caja.innerHTML = errorDe("comunas"); return; }
+  const feats = geo.features;
+  const total = feats.reduce((s, f) => s + (f.properties.no_arboles || 0), 0);
+  caja.innerHTML = `
+    <p class="aviso">Los límites vienen de la capa del censo arbóreo por comuna. La capa oficial de división político-administrativa está publicada por la Alcaldía, pero no permite el acceso; por eso pueden haber diferencias con los límites vigentes.</p>
+    <div class="rejilla">
+      <div class="bloque grande"><p class="etiqueta">Comunas en el mapa</p>${cifra("comunas", fmtEntero.format(feats.length), null)}</div>
+      <div class="bloque grande"><p class="etiqueta">Árboles censados en total</p>${cifra("comunas", fmtEntero.format(total), null, { detalle: "suma de no_arboles de todas las comunas" })}</div>
+    </div>
+    <div class="selector" role="group" aria-label="Colorear el mapa por">
+      ${["arboles_km2", "arboles", "secos_muertos"].map(k => `<button type="button" data-metrica="${k}" aria-pressed="${k === metricaMapa}">${esc(METRICAS[k].nombre)}</button>`).join("")}
+    </div>
+    <div class="mapa-caja">
+      <div id="mapa" role="region" aria-label="Mapa de las comunas de Cali"></div>
+      <div class="ficha-comuna" id="ficha-comuna" aria-live="polite"></div>
+    </div>
+    <div class="escala" id="escala"></div>
+    <div class="bloque tabla-caja" style="margin-top:20px" id="tabla-comunas"></div>`;
+
+  caja.querySelectorAll("[data-metrica]").forEach(b => b.addEventListener("click", () => {
+    metricaMapa = b.dataset.metrica;
+    caja.querySelectorAll("[data-metrica]").forEach(x => x.setAttribute("aria-pressed", x === b));
+    pintarMapa();
+  }));
+  tablaComunas();
+  crearMapa();
+}
+
+function rangosMetrica(k) {
+  const vals = D.comunas.features.map(f => METRICAS[k].calcular(f.properties)).filter(v => v != null).sort((a, b) => a - b);
+  // cortes por cuantiles para que cada color tenga un número parecido de comunas
+  const cortes = [];
+  for (let i = 1; i < PALETA.length; i++) cortes.push(vals[Math.floor(i * vals.length / PALETA.length)]);
+  return { cortes, min: vals[0], max: ultimo(vals) };
+}
+
+function pintarMapa() {
+  const geo = D.comunas, k = metricaMapa, { cortes, min, max } = rangosMetrica(k);
+  geo.features.forEach((f, i) => {
+    f.id = i;
+    const v = METRICAS[k].calcular(f.properties);
+    let c = 0; while (c < cortes.length && v >= cortes[c]) c++;
+    f.properties.__color = v == null ? "#333" : PALETA[c];
+  });
+  document.getElementById("escala").innerHTML = `<span>${esc(METRICAS[k].formato(min))}</span><span class="barra" style="background:linear-gradient(90deg,${PALETA.join(",")})"></span><span>${esc(METRICAS[k].formato(max))}</span><span>${esc(METRICAS[k].nombre)}</span>`;
+  if (mapa && mapa.getSource("comunas")) mapa.getSource("comunas").setData(geo);
+}
+
+function limites(geo) {
+  let x0 = 180, y0 = 90, x1 = -180, y1 = -90;
+  const rec = c => { if (typeof c[0] === "number") { x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); y0 = Math.min(y0, c[1]); y1 = Math.max(y1, c[1]); } else c.forEach(rec); };
+  geo.features.forEach(f => rec(f.geometry.coordinates));
+  return [[x0, y0], [x1, y1]];
+}
+
+function crearMapa() {
+  pintarMapa();
+  if (typeof maplibregl === "undefined") {
+    document.getElementById("mapa").innerHTML = `<div class="error" style="margin:16px">No se pudo cargar la biblioteca del mapa (MapLibre GL). Revisa la conexión; la tabla de abajo tiene los mismos datos.</div>`;
+    return;
+  }
+  if (mapa) { mapa.remove(); mapa = null; }
+  mapa = new maplibregl.Map({
+    container: "mapa",
+    style: {
+      version: 8,
+      sources: { osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© colaboradores de OpenStreetMap" } },
+      layers: [
+        { id: "fondo", type: "background", paint: { "background-color": "#0c1518" } },
+        { id: "osm", type: "raster", source: "osm", paint: { "raster-saturation": -1, "raster-brightness-max": 0.32, "raster-contrast": 0.1, "raster-opacity": 0.9 } },
+      ],
+    },
+    bounds: limites(D.comunas), fitBoundsOptions: { padding: 24 },
+    attributionControl: { compact: true },
+  });
+  mapa.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+  mapa.on("load", () => {
+    mapa.addSource("comunas", { type: "geojson", data: D.comunas });
+    mapa.addLayer({ id: "relleno", type: "fill", source: "comunas", paint: { "fill-color": ["get", "__color"], "fill-opacity": ["case", ["boolean", ["feature-state", "sel"], false], 0.95, 0.78] } });
+    mapa.addLayer({ id: "borde", type: "line", source: "comunas", paint: { "line-color": "#0f1a1e", "line-width": 1.2 } });
+    mapa.addLayer({ id: "borde-sel", type: "line", source: "comunas", paint: { "line-color": "#f2b544", "line-width": ["case", ["boolean", ["feature-state", "sel"], false], 3, 0] } });
+    let sel = null;
+    mapa.on("click", "relleno", ev => {
+      const f = ev.features[0];
+      if (sel != null) mapa.setFeatureState({ source: "comunas", id: sel }, { sel: false });
+      sel = f.id; mapa.setFeatureState({ source: "comunas", id: sel }, { sel: true });
+      mostrarComuna(D.comunas.features[f.id].properties);
+    });
+    mapa.on("mouseenter", "relleno", () => mapa.getCanvas().style.cursor = "pointer");
+    mapa.on("mouseleave", "relleno", () => mapa.getCanvas().style.cursor = "");
+  });
+}
+
+function mostrarComuna(p) {
+  const ficha = document.getElementById("ficha-comuna");
+  const fila = (k, etiqueta) => {
+    const v = METRICAS[k].calcular(p);
+    return v == null ? "" : `<dt>${esc(etiqueta || METRICAS[k].nombre)}</dt><dd>${cifra("comunas", METRICAS[k].formato(v), null, { metrica: k, detalle: p.nombre })}</dd>`;
+  };
+  const crudo = (campo, etiqueta) => p[campo] == null ? "" : `<dt>${esc(etiqueta)}</dt><dd>${cifra("comunas", fmtEntero.format(p[campo]), null, { detalle: `${p.nombre}, campo ${campo}` })}</dd>`;
+  ficha.innerHTML = `<button class="cerrar-ficha" type="button" aria-label="Cerrar">×</button>
+    <h3>${esc(p.nombre || "Comuna " + p.id_comuna)}</h3>
+    <dl>${fila("arboles")}${crudo("arbol_sano", "Sanos")}${crudo("arbol_seco", "Secos")}${crudo("arb_muerto", "Muertos")}${fila("area_km2")}${fila("arboles_km2")}</dl>`;
+  ficha.classList.add("visible");
+  ficha.querySelector(".cerrar-ficha").addEventListener("click", () => ficha.classList.remove("visible"));
+}
+
+let ordenComunas = { campo: "id_comuna", asc: true };
+function tablaComunas() {
+  const cols = [
+    { campo: "id_comuna", nombre: "Comuna", valor: p => p.id_comuna, texto: p => esc(p.nombre || p.id_comuna) },
+    { campo: "arboles", nombre: "Árboles censados", metrica: "arboles" },
+    { campo: "arbol_sano", nombre: "Sanos", valor: p => p.arbol_sano },
+    { campo: "arbol_seco", nombre: "Secos", valor: p => p.arbol_seco },
+    { campo: "arb_muerto", nombre: "Muertos", valor: p => p.arb_muerto },
+    { campo: "area_km2", nombre: "Área", metrica: "area_km2" },
+    { campo: "arboles_km2", nombre: "Árboles por km²", metrica: "arboles_km2" },
+  ];
+  const valor = (c, p) => c.metrica ? METRICAS[c.metrica].calcular(p) : c.valor(p);
+  const filas = D.comunas.features.map(f => f.properties).slice().sort((a, b) => {
+    const c = cols.find(x => x.campo === ordenComunas.campo);
+    const va = valor(c, a) ?? -Infinity, vb = valor(c, b) ?? -Infinity;
+    return (va < vb ? -1 : va > vb ? 1 : 0) * (ordenComunas.asc ? 1 : -1);
+  });
+  const th = c => {
+    const s = ordenComunas.campo === c.campo ? (ordenComunas.asc ? "ascending" : "descending") : "none";
+    return `<th scope="col"><button type="button" data-orden="${c.campo}" aria-sort="${s}">${esc(c.nombre)}</button></th>`;
+  };
+  const td = (c, p) => {
+    if (c.texto) return `<td>${c.texto(p)}</td>`;
+    const v = valor(c, p);
+    if (v == null) return `<td class="num">sin dato</td>`;
+    const txt = c.metrica ? METRICAS[c.metrica].formato(v) : fmtEntero.format(v);
+    return `<td class="num">${cifra("comunas", txt, null, { metrica: c.metrica, detalle: `${p.nombre}${c.metrica ? "" : ", campo " + c.campo}` })}</td>`;
+  };
+  const caja = document.getElementById("tabla-comunas");
+  caja.innerHTML = `<h3>Las comunas una por una</h3><table><thead><tr>${cols.map(th).join("")}</tr></thead><tbody>${filas.map(p => `<tr>${cols.map(c => td(c, p)).join("")}</tr>`).join("")}</tbody></table>
+    <p class="nota">Ordena la tabla tocando el nombre de una columna. Solo se muestran los campos del censo cuyo significado es claro; los demás quedan fuera hasta confirmarlos en la ficha de la IDESC.</p>`;
+  caja.querySelectorAll("[data-orden]").forEach(b => b.addEventListener("click", () => {
+    const campo = b.dataset.orden;
+    ordenComunas = { campo, asc: ordenComunas.campo === campo ? !ordenComunas.asc : campo === "id_comuna" };
+    tablaComunas();
+  }));
+}
+
+function vistaEscucha() {
+  const caja = document.getElementById("escucha-contenido");
+  const e = D.escucha;
+  if (!e) { caja.innerHTML = errorDe("escucha"); return; }
+  const r = e.registros, u = ultimo(r);
+  const max = r.reduce((a, b) => b.vistas > a.vistas ? b : a);
+  caja.innerHTML = `
+    <div class="rejilla">
+      <div class="bloque grande"><p class="etiqueta">Visitas en el último mes</p>${cifra("escucha", fmtEntero.format(u.vistas), fmtPeriodo(u.periodo))}</div>
+      <div class="bloque grande"><p class="etiqueta">Mes con más visitas</p>${cifra("escucha", fmtEntero.format(max.vistas), fmtPeriodo(max.periodo))}</div>
+    </div>
+    <div class="bloque grafica">
+      <h3>Visitas por mes</h3>
+      ${graficaBarras({
+        valores: r.map(x => x.vistas), etiquetas: r.map(x => x.periodo), color: "#f2b544", formatoY: compacto,
+        cadaX: 3, etiquetaX: i => { const [a, m] = r[i].periodo.split("-"); return `${MESES[+m - 1].slice(0, 3)} ${a.slice(2)}`; },
+        formato: v => fmtEntero.format(v) + " visitas",
+      })}
+      <p class="nota">Cuenta solo las visitas de personas al artículo «Cali»; no incluye las que entran por «Santiago de Cali».</p>
+    </div>`;
+}
+
+function vistaNoSabe() {
+  const vig = k => D[k] ? D[k].vigencia : "su última vigencia";
+  const huecos = [
+    ["Desempeño municipal después de " + vig("desempeno"), "La serie del DNP en datos abiertos se detuvo; la ficha declara actualización anual."],
+    ["Población después de " + vig("poblacion"), "El portal de Cali la publica solo hasta ese año. La proyección vigente del DANE existe, pero solo en Excel."],
+    ["Población por comuna", "No la encontramos abierta y con fecha; por eso el mapa muestra árboles y no habitantes."],
+    ["Límites oficiales de las comunas", "La capa de Planeación está publicada, pero el servidor niega el acceso."],
+    ["Calidad del aire", "Era una pregunta del concejal; no la integramos en esta versión."],
+  ];
+  document.getElementById("huecos").innerHTML = huecos.map(([a, b]) => `<li><b>${esc(a)}</b><span>${esc(b)}</span></li>`).join("");
+  const no = (D.catalogo || []).filter(f => f.estado !== "Integrada al lago");
+  document.getElementById("no-integradas").innerHTML = no.length
+    ? no.map(f => `<li><b>${esc(f.id)} · ${esc(f.nombre)}</b><span>${claseEstado(f.estado).html} ${esc(f.observaciones || "")}</span></li>`).join("")
+    : `<li><span>Todas las fuentes del catálogo están integradas.</span></li>`;
+}
+
+function claseEstado(e) {
+  const c = e === "Integrada al lago" ? "integrada" : e === "Candidata" ? "candidata" : "caida";
+  return { c, html: `<span class="estado ${c}">${esc(e)}</span>` };
+}
+
+function vistaFuentes() {
+  const caja = document.getElementById("tabla-fuentes");
+  if (!D.catalogo) { caja.innerHTML = `<div class="error" role="alert">No se pudo cargar el catálogo (${esc(ARCHIVOS.catalogo)}): ${esc(ERRORES.catalogo || "")}.</div>`; return; }
+  caja.innerHTML = `<table><thead><tr><th>Id</th><th>Fuente</th><th>Entidad</th><th>Licencia</th><th>Estado</th><th>Probada</th><th>Observaciones</th></tr></thead><tbody>
+    ${D.catalogo.map(f => `<tr>
+      <td>${esc(f.id)}</td>
+      <td>${f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.nombre)}</a>` : esc(f.nombre)}</td>
+      <td>${esc(f.entidad)}</td>
+      <td>${f.licencia_url ? `<a href="${esc(f.licencia_url)}" target="_blank" rel="noopener">${esc(f.licencia)}</a>` : esc(f.licencia)}</td>
+      <td>${claseEstado(f.estado).html}</td>
+      <td>${esc(f.probado ? fmtFecha(f.probado) : "sin probar")}</td>
+      <td style="min-width:260px">${esc(f.observaciones || "")}</td></tr>`).join("")}
+  </tbody></table>`;
+}
+
+/* =====================================================================
+   Navegación por secciones (#panorama, #gente…)
+   ===================================================================== */
+const SECCIONES = ["panorama", "gente", "gestion", "territorio", "escucha", "no-sabe", "fuentes"];
+function mostrarSeccion() {
+  const s = SECCIONES.includes(location.hash.slice(1)) ? location.hash.slice(1) : "panorama";
+  SECCIONES.forEach(x => document.getElementById("v-" + x).classList.toggle("activa", x === s));
+  document.querySelectorAll(".menu a").forEach(a => a.toggleAttribute("aria-current", a.getAttribute("href") === "#" + s));
+  if (document.querySelector(".menu a[aria-current]")) document.querySelector(".menu a[aria-current]").setAttribute("aria-current", "page");
+  if (s === "territorio" && mapa) setTimeout(() => mapa.resize(), 0);
+  window.scrollTo(0, 0);
+  cerrarMenu();
+}
+window.addEventListener("hashchange", mostrarSeccion);
+
+const botonMenu = document.getElementById("abrir-menu");
+function cerrarMenu() { document.getElementById("lateral").classList.remove("abierta"); botonMenu.setAttribute("aria-expanded", "false"); }
+botonMenu.addEventListener("click", () => {
+  const abierta = document.getElementById("lateral").classList.toggle("abierta");
+  botonMenu.setAttribute("aria-expanded", String(abierta));
+});
+
+/* =====================================================================
+   Arranque
+   ===================================================================== */
+(async function () {
+  const repo = `https://github.com/${REPO}`;
+  document.getElementById("enlace-repo").href = repo;
+  document.getElementById("enlace-repo-pie").href = repo;
+  mostrarSeccion();
+  await cargarTodo();
+  vistaPanorama(); vistaGente(); vistaGestion(); vistaEscucha(); vistaNoSabe(); vistaFuentes();
+  // el mapa se crea cuando su sección es visible, para que MapLibre mida bien el contenedor
+  const iniciarTerritorio = () => { if (location.hash === "#territorio" && !mapa) vistaTerritorio(); };
+  if (D.comunas) { tablaInicial(); window.addEventListener("hashchange", iniciarTerritorio); iniciarTerritorio(); }
+  else vistaTerritorio();
+  function tablaInicial() { if (location.hash !== "#territorio") { vistaTerritorioSinMapa(); } }
+})();
+
+function vistaTerritorioSinMapa() {
+  // deja lista la sección (tabla y cifras) sin crear el mapa todavía
+  const crear = crearMapa; crearMapa = () => {}; vistaTerritorio(); crearMapa = crear;
+}
+</script>
+</body>
+</html>
