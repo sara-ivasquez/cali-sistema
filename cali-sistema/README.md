@@ -1,6 +1,6 @@
 # Cali · sistema de información
 
-Grupo: Sara Isabel Vásquez (datos: catálogo, ingesta, lago y verificación) · Alejandro Rendón (vistas) · Enlace: <url de la página> · Revisado: 2026-10-05
+Grupo: Sara Isabel Vásquez (datos: catálogo, ingesta, lago y verificación) · Alejandro Rendón (vistas) · Enlace: <url de la página> · Revisado: 2026-10-06
 
 ## Cómo se reconstruye
 ```
