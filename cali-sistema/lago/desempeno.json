@@ -1,31 +1,71 @@
 {
-  "fuente": "F02",
-  "url": "https://www.datos.gov.co/resource/nkjx-rsq7.json?$select=anio,dato&$where=codigo_entidad%3D%2776001%27%20AND%20indicador%3D%27MDM%27&$order=anio",
-  "vigencia": "2020",
-  "probado": "2026-10-05",
-  "cifras": {
-    "mdm_ultimo_anio": 86.45
+ "tema": "desempeno",
+ "probado": "2026-10-06",
+ "fuentes": [
+  {
+   "id": "F02",
+   "nombre": "Medición de Desempeño Municipal (MDM)",
+   "url": "https://www.datos.gov.co/resource/nkjx-rsq7.json?$select=anio,dato&$where=codigo_entidad%3D%2776001%27%20AND%20indicador%3D%27MDM%27&$order=anio",
+   "estado": "Integrada al lago",
+   "licencia": "CC BY-SA 4.0"
+  }
+ ],
+ "cifras": {
+  "mdm_ultimo_anio": {
+   "valor": 86.45,
+   "unidad": "puntos de 0 a 100",
+   "vigencia": "2020",
+   "fuente": "F02"
+  }
+ },
+ "series": {
+  "mdm": {
+   "unidad": "puntos de 0 a 100",
+   "fuente": "F02",
+   "puntos": [
+    [
+     2016,
+     77.2
+    ],
+    [
+     2017,
+     63.82
+    ],
+    [
+     2018,
+     81.38
+    ],
+    [
+     2019,
+     83.74
+    ],
+    [
+     2020,
+     86.45
+    ]
+   ]
+  }
+ },
+ "registros": [
+  {
+   "anio": 2016,
+   "mdm": 77.2
   },
-  "registros": [
-    {
-      "anio": 2016,
-      "mdm": 77.2
-    },
-    {
-      "anio": 2017,
-      "mdm": 63.82
-    },
-    {
-      "anio": 2018,
-      "mdm": 81.38
-    },
-    {
-      "anio": 2019,
-      "mdm": 83.74
-    },
-    {
-      "anio": 2020,
-      "mdm": 86.45
-    }
-  ]
+  {
+   "anio": 2017,
+   "mdm": 63.82
+  },
+  {
+   "anio": 2018,
+   "mdm": 81.38
+  },
+  {
+   "anio": 2019,
+   "mdm": 83.74
+  },
+  {
+   "anio": 2020,
+   "mdm": 86.45
+  }
+ ]
 }

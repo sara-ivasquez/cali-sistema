@@ -1,95 +1,199 @@
 {
-  "fuente": "F01",
-  "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/es.wikipedia/all-access/user/Cali/monthly/20250101/20260930",
-  "vigencia": "2026-09",
-  "probado": "2026-10-05",
-  "cifras": {
-    "vistas_ultimo_mes": 8495
+ "tema": "escucha",
+ "probado": "2026-10-06",
+ "fuentes": [
+  {
+   "id": "F01",
+   "nombre": "Vistas mensuales del artículo de Cali en Wikipedia",
+   "url": "https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/es.wikipedia/all-access/user/Cali/monthly/20250101/20260930",
+   "estado": "Integrada al lago",
+   "licencia": "CC0"
+  }
+ ],
+ "cifras": {
+  "vistas_ultimo_mes": {
+   "valor": 8495,
+   "unidad": "vistas de personas",
+   "vigencia": "2026-09",
+   "fuente": "F01"
+  }
+ },
+ "series": {
+  "vistas": {
+   "unidad": "vistas de personas",
+   "fuente": "F01",
+   "puntos": [
+    [
+     "2025-01",
+     16345
+    ],
+    [
+     "2025-02",
+     14459
+    ],
+    [
+     "2025-03",
+     15764
+    ],
+    [
+     "2025-04",
+     13927
+    ],
+    [
+     "2025-05",
+     14262
+    ],
+    [
+     "2025-06",
+     12784
+    ],
+    [
+     "2025-07",
+     17083
+    ],
+    [
+     "2025-08",
+     16268
+    ],
+    [
+     "2025-09",
+     12569
+    ],
+    [
+     "2025-10",
+     12412
+    ],
+    [
+     "2025-11",
+     16740
+    ],
+    [
+     "2025-12",
+     11797
+    ],
+    [
+     "2026-01",
+     12057
+    ],
+    [
+     "2026-02",
+     9973
+    ],
+    [
+     "2026-03",
+     9854
+    ],
+    [
+     "2026-04",
+     10202
+    ],
+    [
+     "2026-05",
+     10130
+    ],
+    [
+     "2026-06",
+     10726
+    ],
+    [
+     "2026-07",
+     12281
+    ],
+    [
+     "2026-08",
+     24431
+    ],
+    [
+     "2026-09",
+     8495
+    ]
+   ]
+  }
+ },
+ "registros": [
+  {
+   "periodo": "2025-01",
+   "vistas": 16345
   },
-  "registros": [
-    {
-      "periodo": "2025-01",
-      "vistas": 16345
-    },
-    {
-      "periodo": "2025-02",
-      "vistas": 14459
-    },
-    {
-      "periodo": "2025-03",
-      "vistas": 15764
-    },
-    {
-      "periodo": "2025-04",
-      "vistas": 13927
-    },
-    {
-      "periodo": "2025-05",
-      "vistas": 14262
-    },
-    {
-      "periodo": "2025-06",
-      "vistas": 12784
-    },
-    {
-      "periodo": "2025-07",
-      "vistas": 17083
-    },
-    {
-      "periodo": "2025-08",
-      "vistas": 16268
-    },
-    {
-      "periodo": "2025-09",
-      "vistas": 12569
-    },
-    {
-      "periodo": "2025-10",
-      "vistas": 12412
-    },
-    {
-      "periodo": "2025-11",
-      "vistas": 16740
-    },
-    {
-      "periodo": "2025-12",
-      "vistas": 11797
-    },
-    {
-      "periodo": "2026-01",
-      "vistas": 12057
-    },
-    {
-      "periodo": "2026-02",
-      "vistas": 9973
-    },
-    {
-      "periodo": "2026-03",
-      "vistas": 9854
-    },
-    {
-      "periodo": "2026-04",
-      "vistas": 10202
-    },
-    {
-      "periodo": "2026-05",
-      "vistas": 10130
-    },
-    {
-      "periodo": "2026-06",
-      "vistas": 10726
-    },
-    {
-      "periodo": "2026-07",
-      "vistas": 12281
-    },
-    {
-      "periodo": "2026-08",
-      "vistas": 24431
-    },
-    {
-      "periodo": "2026-09",
-      "vistas": 8495
-    }
-  ]
+  {
+   "periodo": "2025-02",
+   "vistas": 14459
+  },
+  {
+   "periodo": "2025-03",
+   "vistas": 15764
+  },
+  {
+   "periodo": "2025-04",
+   "vistas": 13927
+  },
+  {
+   "periodo": "2025-05",
+   "vistas": 14262
+  },
+  {
+   "periodo": "2025-06",
+   "vistas": 12784
+  },
+  {
+   "periodo": "2025-07",
+   "vistas": 17083
+  },
+  {
+   "periodo": "2025-08",
+   "vistas": 16268
+  },
+  {
+   "periodo": "2025-09",
+   "vistas": 12569
+  },
+  {
+   "periodo": "2025-10",
+   "vistas": 12412
+  },
+  {
+   "periodo": "2025-11",
+   "vistas": 16740
+  },
+  {
+   "periodo": "2025-12",
+   "vistas": 11797
+  },
+  {
+   "periodo": "2026-01",
+   "vistas": 12057
+  },
+  {
+   "periodo": "2026-02",
+   "vistas": 9973
+  },
+  {
+   "periodo": "2026-03",
+   "vistas": 9854
+  },
+  {
+   "periodo": "2026-04",
+   "vistas": 10202
+  },
+  {
+   "periodo": "2026-05",
+   "vistas": 10130
+  },
+  {
+   "periodo": "2026-06",
+   "vistas": 10726
+  },
+  {
+   "periodo": "2026-07",
+   "vistas": 12281
+  },
+  {
+   "periodo": "2026-08",
+   "vistas": 24431
+  },
+  {
+   "periodo": "2026-09",
+   "vistas": 8495
+  }
+ ]
 }

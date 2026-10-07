@@ -70,5 +70,33 @@
     "probado": null,
     "como_se_encontro": "Búsqueda web en dane.gov.co",
     "observaciones": "Es la fuente vigente de población (F03 llega a 2020), pero viene en Excel: leerla exige openpyxl o descargar a mano. Pendiente decidir si se integra."
+  },
+    {
+    "id": "F06",
+    "nombre": "Capa de comunas documentada en el portal (idesc:mc_comunas)",
+    "entidad": "Alcaldía de Santiago de Cali",
+    "url": "https://ws-idesc.cali.gov.co/geoserver/wfs",
+    "formato": "GeoJSON (servicio WFS de la IDESC)",
+    "acceso": "Servicio WFS sin llave",
+    "licencia": "CC BY-SA (sin versión declarada)",
+    "personas": "No",
+    "estado": "No existe",
+    "probado": "2026-10-05",
+    "como_se_encontro": "Ficha 'Servicio WMS Comunas de Cali' (2020) en datos.cali.gov.co",
+    "observaciones": "El servidor responde InvalidParameterValue: la capa documentada ya no existe. Reemplazada por F04."
+  },
+  {
+    "id": "F07",
+    "nombre": "Capa oficial de comunas de Planeación (dapm:pdt_dpa_comunas)",
+    "entidad": "Alcaldía de Santiago de Cali",
+    "url": "https://ws-idesc.cali.gov.co/geoserver/wfs",
+    "formato": "GeoJSON (servicio WFS de la IDESC)",
+    "acceso": "Servicio WFS sin llave",
+    "licencia": "no declara",
+    "personas": "No",
+    "estado": "No responde",
+    "probado": "2026-10-05",
+    "como_se_encontro": "GetCapabilities del WFS de la IDESC (357 capas, 4 con 'comuna')",
+    "observaciones": "Está publicada, pero el servidor responde con un error interno: 'permission denied for table pdt_dpa_comunas'. Es la división oficial; por eso F04 puede diferir de los límites vigentes."
   }
 ]

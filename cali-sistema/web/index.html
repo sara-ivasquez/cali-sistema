@@ -210,6 +210,7 @@
   <!-- ================= PANORAMA ================= -->
   <section class="vista" id="v-panorama" aria-labelledby="t-panorama">
     <h1 class="titular" id="t-panorama">Entiende Cali.<span>Decide con evidencia.</span></h1>
+    <p class="aviso" id="aviso-vigencia" role="alert" hidden style="margin-top:24px"></p>
     <p class="lead" id="resumen">Cargando los datos del lago…</p>
     <ul class="chips" id="chips"></ul>
 
@@ -385,8 +386,23 @@ async function cargarTodo() {
   // el catálogo primero, para fijar de dónde se leen los demás
   try { D.catalogo = await traer(ARCHIVOS.catalogo); } catch (e) { ERRORES.catalogo = e.message; }
   await Promise.all(Object.entries(ARCHIVOS).filter(([k]) => k !== "catalogo").map(async ([k, ruta]) => {
-    try { D[k] = await traer(ruta); } catch (e) { ERRORES[k] = e.message; }
+    try { D[k] = normalizar(await traer(ruta)); } catch (e) { ERRORES[k] = e.message; }
   }));
+}
+
+/** Adapta un archivo del lago con la forma del contrato (fuentes, cifras con valor/unidad/vigencia)
+    a lo que usan las vistas. También acepta la forma anterior, sin contrato. */
+function normalizar(d) {
+  if (!d || !Array.isArray(d.fuentes)) return d;
+  const f = d.fuentes[0] || {};
+  const cifras = d.cifras || {};
+  const primera = Object.values(cifras)[0] || {};
+  d.cifrasContrato = cifras;
+  d.cifras = Object.fromEntries(Object.entries(cifras).map(([k, c]) => [k, c && typeof c === "object" ? c.valor : c]));
+  d.fuente = d.fuente || f.id;
+  d.url = d.url || f.url;
+  d.vigencia = d.vigencia || primera.vigencia;
+  return d;
 }
 
 function fuente(id) { return (D.catalogo || []).find(f => f.id === id) || null; }
@@ -415,6 +431,7 @@ function abrirTraza(t) {
     filas.push(["Entidad", esc(f.entidad)]);
     filas.push(["Licencia", f.licencia_url ? `<a href="${esc(f.licencia_url)}" target="_blank" rel="noopener">${esc(f.licencia)}</a>` : esc(f.licencia)]);
   }
+  if (t.clave && datos.cifrasContrato && datos.cifrasContrato[t.clave]) filas.push(["Unidad", esc(datos.cifrasContrato[t.clave].unidad)]);
   filas.push(["Vigencia del dato", esc(datos.vigencia || "sin dato")]);
   filas.push(["Fuente probada el", esc(fmtFecha(datos.probado || (f && f.probado)))]);
   if (datos.capa) filas.push(["Capa", esc(datos.capa)]);
@@ -531,7 +548,17 @@ function vistaPanorama() {
   const fechas = Object.keys(FUENTE_DE).map(k => D[k] && D[k].probado).filter(Boolean).sort();
   const integradas = cat.filter(f => f.estado === "Integrada al lago").length;
   const chips = [];
-  if (fechas.length) chips.push(`<li class="ok">lago probado ${esc(fmtFecha(ultimo(fechas)))}</li>`);
+  if (fechas.length) {
+    const reciente = ultimo(fechas);
+    const dias = Math.floor((Date.now() - new Date(reciente + "T00:00:00")) / 864e5);
+    chips.push(`<li class="${dias > 365 ? "" : "ok"}">lago probado ${esc(fmtFecha(reciente))}</li>`);
+    // Ciclo de vida: si la prueba más reciente tiene más de un año, la portada lo dice antes que cualquier cifra
+    if (dias > 365) {
+      const av = document.getElementById("aviso-vigencia");
+      av.textContent = `Este sistema no se ha actualizado en más de un año: la prueba más reciente de sus fuentes es del ${fmtFecha(reciente)}. Las cifras pueden estar desactualizadas y algunos portales pueden haber dejado de responder. Úsalo como registro histórico, no para decidir hoy.`;
+      av.hidden = false;
+    }
+  }
   if (cat.length) chips.push(`<li>${fmtEntero.format(cat.length)} fuentes catalogadas</li>`, `<li>${fmtEntero.format(integradas)} integradas</li>`);
   const fallidos = Object.keys(ERRORES).length;
   if (fallidos) chips.push(`<li>${fmtEntero.format(fallidos)} archivos sin cargar</li>`);
