@@ -22,8 +22,8 @@ UNIDADES = {
     "poblacion_urbana": "habitantes",
     "poblacion_rural_ultimo_anio": "habitantes",
     "poblacion_rural": "habitantes",
-    "densidad_ultimo_anio": "habitantes por km²",
-    "densidad": "habitantes por km²",
+    "densidad_ultimo_anio": "habitantes por hectárea",
+    "densidad": "habitantes por hectárea",
     "numero_comunas": "comunas",
 }
 EJES = ("anio", "periodo")  # columnas que sirven de eje x para las series

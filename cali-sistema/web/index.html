@@ -220,7 +220,19 @@
       <a class="pregunta" href="#territorio"><h3>¿Cómo están los árboles en cada comuna?</h3><p id="p-territorio">Censo arbóreo en el mapa de las comunas.</p></a>
       <a class="pregunta" href="#escucha"><h3>¿Cuánto interés despierta Cali afuera?</h3><p id="p-escucha">Visitas mensuales al artículo de Cali en Wikipedia.</p></a>
     </div>
-    <p class="nota">Toca cualquier cifra subrayada para ver de dónde salió, qué periodo cubre y cuándo se probó la fuente.</p>
+    <div class="bloque" style="margin-top:8px">
+      <h3>Qué responde este sistema</h3>
+      <ul class="huecos">
+        <li><b><span class="estado integrada">Respondida</span> ¿Cuánta gente vive en Cali, y cuánta en la zona urbana y en la rural?</b><span>Con F03, hasta el último año publicado.</span></li>
+        <li><b><span class="estado integrada">Respondida</span> ¿Qué tan bien gestiona el municipio sus recursos?</b><span>Con F02, hasta el último año publicado.</span></li>
+        <li><b><span class="estado integrada">Respondida</span> ¿Cuántos árboles hay en cada comuna y en qué estado están?</b><span>Con F04, en el mapa de las 22 comunas.</span></li>
+        <li><b><span class="estado integrada">Respondida</span> ¿Cuánto interés despierta Cali fuera de ella?</b><span>Con F01, mes a mes.</span></li>
+        <li><b><span class="estado candidata">Pendiente</span> ¿Cuánta gente vive hoy en Cali y en cada comuna?</b><span>La población vigente (DANE, F05) solo está en Excel y no hay población por comuna abierta.</span></li>
+        <li><b><span class="estado caida">Pendiente</span> ¿Cómo está la calidad del aire?</b><span>Era una pregunta inicial; no integramos una fuente para responderla.</span></li>
+      </ul>
+      <p class="nota">Este sistema no usa datos simulados ni aproximados (PROXY): todas las cifras salen de las fuentes integradas. Las cifras calculadas (porcentajes y árboles por km²) muestran su fórmula al tocarlas.</p>
+    </div>
+    <p class="nota">Toca cualquier cifra subrayada para ver de dónde salió (con su ID de fuente), qué periodo cubre y cuándo se probó.</p>
   </section>
 
   <!-- ================= GENTE ================= -->
@@ -267,12 +279,13 @@
     <div class="bloque">
       <h3>Cómo se construye</h3>
       <p>Un script de Python por fuente baja los datos de cada portal, los limpia y los guarda en un lago de archivos JSON. Cada archivo lleva pegada su fuente, la vigencia del dato y la fecha en que la fuente respondió. Antes de publicar, un script de verificación revisa el catálogo, la procedencia de cada cifra, que los valores estén en rangos con sentido y que el mapa caiga dentro de Cali; con una sola falla, no se publica.</p>
+      <p><b>Sin datos simulados.</b> Ninguna cifra es PROXY ni aproximada: todas salen de las fuentes integradas, y las calculadas muestran su fórmula. Ningún dato apunta a una persona: todo está agregado por ciudad o por comuna.</p>
       <p>Esta página no tiene ninguna cifra escrita a mano: las lee del lago cada vez que se abre. Todo el código y los datos están en el <a id="enlace-repo" href="#">repositorio del proyecto</a>.</p>
     </div>
   </section>
 
   <footer>
-    <p>Grupo: Sara Isabel Vásquez (datos) y Alejandro Rendón (vistas)</p>
+    <p>Grupo: Sara Isabel Vásquez y Alejandro Rendón</p>
     <p>Tópicos de Sistemas de Información, Universidad EAFIT</p>
     <p><a id="enlace-repo-pie" href="#">Repositorio del proyecto</a></p>
   </footer>
@@ -333,6 +346,12 @@ const METRICAS = {
     formula: "no_arboles",
     calcular: p => p.no_arboles ?? null,
     formato: v => fmtEntero.format(v),
+  },
+  pct_sanos: {
+    nombre: "% de árboles sanos",
+    formula: "arbol_sano / no_arboles × 100",
+    calcular: p => (p.arbol_sano != null && p.no_arboles > 0) ? p.arbol_sano / p.no_arboles * 100 : null,
+    formato: v => fmtUno.format(v) + " %",
   },
   secos_muertos: {
     nombre: "Árboles secos o muertos",
@@ -581,7 +600,7 @@ function vistaGente() {
       <div class="bloque grande"><p class="etiqueta">Población total</p>${cifra("poblacion", fmtEntero.format(u.poblacion), "proyección " + p.vigencia)}</div>
       ${u.poblacion_urbana != null ? `<div class="bloque grande"><p class="etiqueta">Zona urbana (comunas)</p>${cifra("poblacion", fmtEntero.format(u.poblacion_urbana), p.vigencia)}</div>` : ""}
       ${u.poblacion_rural != null ? `<div class="bloque grande"><p class="etiqueta">Zona rural (corregimientos)</p>${cifra("poblacion", fmtEntero.format(u.poblacion_rural), p.vigencia)}</div>` : ""}
-      ${u.densidad != null ? `<div class="bloque grande"><p class="etiqueta">Densidad bruta, habitantes por km²</p>${cifra("poblacion", fmtEntero.format(u.densidad), p.vigencia, { detalle: "densidad del total del distrito según la fuente" })}</div>` : ""}
+      ${u.densidad != null ? `<div class="bloque grande"><p class="etiqueta">Densidad bruta, habitantes por hectárea</p>${cifra("poblacion", fmtDecimal.format(u.densidad), p.vigencia, { detalle: "densidad bruta del total del distrito según la fuente, en habitantes por hectárea" })}</div>` : ""}
     </div>
     <div class="bloque grafica">
       <h3>Población de ${esc(ini.anio)} a ${esc(u.anio)}</h3>
@@ -658,7 +677,7 @@ function vistaTerritorio() {
       <div class="bloque grande"><p class="etiqueta">Árboles censados en total</p>${cifra("comunas", fmtEntero.format(total), null, { detalle: "suma de no_arboles de todas las comunas" })}</div>
     </div>
     <div class="selector" role="group" aria-label="Colorear el mapa por">
-      ${["arboles_km2", "arboles", "secos_muertos"].map(k => `<button type="button" data-metrica="${k}" aria-pressed="${k === metricaMapa}">${esc(METRICAS[k].nombre)}</button>`).join("")}
+      ${["arboles_km2", "arboles", "pct_sanos", "secos_muertos"].map(k => `<button type="button" data-metrica="${k}" aria-pressed="${k === metricaMapa}">${esc(METRICAS[k].nombre)}</button>`).join("")}
     </div>
     <div class="mapa-caja">
       <div id="mapa" role="region" aria-label="Mapa de las comunas de Cali"></div>
@@ -750,7 +769,7 @@ function mostrarComuna(p) {
   const crudo = (campo, etiqueta) => p[campo] == null ? "" : `<dt>${esc(etiqueta)}</dt><dd>${cifra("comunas", fmtEntero.format(p[campo]), null, { detalle: `${p.nombre}, campo ${campo}` })}</dd>`;
   ficha.innerHTML = `<button class="cerrar-ficha" type="button" aria-label="Cerrar">×</button>
     <h3>${esc(p.nombre || "Comuna " + p.id_comuna)}</h3>
-    <dl>${fila("arboles")}${crudo("arbol_sano", "Sanos")}${crudo("arbol_seco", "Secos")}${crudo("arb_muerto", "Muertos")}${fila("area_km2")}${fila("arboles_km2")}</dl>`;
+    <dl>${fila("arboles")}${crudo("arbol_sano", "Sanos")}${crudo("arb_regula", "Regulares")}${crudo("arbol_seco", "Secos")}${crudo("arb_muerto", "Muertos")}${fila("area_km2")}${fila("arboles_km2")}</dl>`;
   ficha.classList.add("visible");
   ficha.querySelector(".cerrar-ficha").addEventListener("click", () => ficha.classList.remove("visible"));
 }
@@ -761,6 +780,8 @@ function tablaComunas() {
     { campo: "id_comuna", nombre: "Comuna", valor: p => p.id_comuna, texto: p => esc(p.nombre || p.id_comuna) },
     { campo: "arboles", nombre: "Árboles censados", metrica: "arboles" },
     { campo: "arbol_sano", nombre: "Sanos", valor: p => p.arbol_sano },
+    { campo: "arb_regula", nombre: "Regulares", valor: p => p.arb_regula },
+    { campo: "pct_sanos", nombre: "% sanos", metrica: "pct_sanos" },
     { campo: "arbol_seco", nombre: "Secos", valor: p => p.arbol_seco },
     { campo: "arb_muerto", nombre: "Muertos", valor: p => p.arb_muerto },
     { campo: "area_km2", nombre: "Área", metrica: "area_km2" },
@@ -785,7 +806,7 @@ function tablaComunas() {
   };
   const caja = document.getElementById("tabla-comunas");
   caja.innerHTML = `<h3>Las comunas una por una</h3><table><thead><tr>${cols.map(th).join("")}</tr></thead><tbody>${filas.map(p => `<tr>${cols.map(c => td(c, p)).join("")}</tr>`).join("")}</tbody></table>
-    <p class="nota">Ordena la tabla tocando el nombre de una columna. Solo se muestran los campos del censo cuyo significado es claro; los demás quedan fuera hasta confirmarlos en la ficha de la IDESC.</p>`;
+    <p class="nota">Ordena la tabla tocando el nombre de una columna. Sanos + regulares + secos + muertos suman el total de árboles de cada comuna. No se muestran los campos del censo cuyo significado no está descrito en la fuente (las siglas EEP y EEC, árboles por habitante); area_m2 resultó ser la cobertura arbórea, no el área de la comuna, que aquí se calcula desde el polígono.</p>`;
   caja.querySelectorAll("[data-orden]").forEach(b => b.addEventListener("click", () => {
     const campo = b.dataset.orden;
     ordenComunas = { campo, asc: ordenComunas.campo === campo ? !ordenComunas.asc : campo === "id_comuna" };

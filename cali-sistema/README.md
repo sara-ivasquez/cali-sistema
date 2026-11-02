@@ -1,6 +1,6 @@
 # Cali · sistema de información
 
-Grupo: Sara Isabel Vásquez · Alejandro Rendón · Enlace: https://sara-ivasquez.github.io/cali-sistema/cali-sistema/web/ · Revisado: 2026-10-06
+Grupo: Sara Isabel Vásquez · Alejandro Rendón · Enlace: https://sara-ivasquez.github.io/cali-sistema/cali-sistema/web/ · Revisado: 2026-11-02
 
 ## Cómo se reconstruye
 ```
@@ -43,7 +43,9 @@ La página no tiene ninguna cifra escrita a mano: lee en tiempo de ejecución `l
   3. ¿Cuántos árboles hay en cada comuna y en qué estado están? (F04). Reemplazó a la pregunta inicial sobre calidad del aire, para la que no integramos fuente.
   4. ¿Cuánto interés despierta Cali afuera y cómo cambia en el año? (F01 · vistas en Wikipedia)
 - Escala y comparación: la ciudad contra sí misma en el tiempo (población 1987–2020, MDM 2016–2020, vistas mes a mes); urbana contra rural (F03); y las 22 comunas entre sí (F04).
-- Lo que decidimos no mostrar, y por qué: los campos del censo arbóreo cuyo significado no está confirmado en la ficha de la IDESC (`cobarb_ha`, `arb_habita`, `arb_eep` y similares, y `area_m2`: al usarlo, la densidad daba entre 17.030 y 42.980 árboles por km², imposible para una ciudad; el área se calcula desde el polígono).
+- Respondidas en el sistema: las preguntas 1 a 4. Pendientes, y así lo dice la portada: la población vigente y por comuna (la del DANE, F05, solo está en Excel) y la calidad del aire (no integramos fuente).
+- Lo que decidimos no mostrar, y por qué: los campos del censo arbóreo que la fuente no describe (siglas EEP y EEC, `arb_habita`) y `area_m2`, que resultó ser la cobertura arbórea y no el área de la comuna (con él la densidad daba entre 17.030 y 42.980 árboles por km², imposible para una ciudad; el área se calcula desde el polígono). Tampoco integramos fuentes con registros individuales, como los de seguridad.
+- Datos simulados o aproximados (PROXY): ninguno. Todas las cifras salen de las fuentes integradas; las calculadas (porcentajes, árboles por km²) muestran su fórmula a un clic. La portada lo dice.
 - Huecos que el sistema dice en pantalla: MDM posterior a 2020, población posterior a 2020, población por comuna, límites oficiales de comunas, calidad del aire.
 
 ## La réplica
@@ -61,7 +63,7 @@ La página no tiene ninguna cifra escrita a mano: lee en tiempo de ejecución `l
 | F01 · Vistas del artículo «Cali» en Wikipedia | CC0 | No | Integrada | Ninguna |
 | F02 · Medición de Desempeño Municipal (DNP) | CC BY-SA 4.0 | No | Integrada | Citar al DNP; lo derivado se publica con la misma licencia. Serie solo hasta 2020 |
 | F03 · Población y densidad de Cali (DAPM) | CC BY-SA (sin versión declarada) | No | Integrada | Citar a la Alcaldía; misma licencia. Serie hasta 2020 |
-| F04 · Comunas con censo arbóreo (IDESC) | CC BY-SA (sin versión declarada) | No | Integrada | Citar a la Alcaldía; misma licencia. <confirmar la licencia de esta capa> |
+| F04 · Comunas con censo arbóreo (IDESC) | no declara | No | Integrada | No encontramos la ficha de licencia de esta capa (en el diccionario: «no declara»); citamos a la Alcaldía |
 | F05 · Proyecciones de población DANE 2018–2042 | por verificar | No | Candidata | Pendiente: solo en Excel |
 | F06 · Capa `idesc:mc_comunas` | CC BY-SA (sin versión declarada) | No | No existe | La capa documentada en 2020 ya no está en el servidor |
 | F07 · Capa oficial `dapm:pdt_dpa_comunas` | no declara | No | No responde | Publicada, pero el servidor niega el acceso |
@@ -74,7 +76,8 @@ La página no tiene ninguna cifra escrita a mano: lee en tiempo de ejecución `l
 | Lago | Archivos JSON con la forma del contrato | Nada | — | `lago/*.json` en el repositorio | Sí: `python3 ingesta/todo.py` | — | Cada cifra con valor, unidad, vigencia y fuente; la página los lee directo | Cruzar dos fuentes exige código | Sí: es lo que puede leer la página sin servidor |
 | Lago | DuckDB 1.5.6 sobre los mismos JSON | `pip install duckdb` | MIT (OSI) | En memoria; lee los JSON del lago | Sí: `python3 explorar/duckdb_lago.py` | Activo (1.5.6) | Cruzó población (F03) y MDM (F02) por año con una consulta SQL: 5 años en común (2016–2020) | La página no puede leerlo directamente; necesita instalación | No como lago, sí como herramienta de análisis sobre el lago |
 | Verificación | `verificar.py` propio | Nada | — | — | Sí: `python3 verificacion/verificar.py` | Propio | Catálogo con listas cerradas; contrato de cada archivo; rangos de cada cifra; ningún campo ni texto con datos personales; coordenadas dentro de Cali. Probado rompiendo el lago a propósito: detectó una fecha con hora, una cifra sin fuente y un texto con correo y celular | No compara contra la corrida anterior | Sí <pendiente: segunda herramienta, por ejemplo Frictionless> |
-| Vistas | Página HTML + MapLibre GL (hecha con Claude) | Nada: un archivo HTML; MapLibre y OpenStreetMap sin llave | MapLibre: BSD-3 (OSI); mapa base: ODbL | Lee el lago del repositorio; no guarda nada | Sí: se publica sola con cada `git push` | Activo | Las 7 secciones, trazabilidad a un clic en cada cifra, mapa de las 22 comunas, funciona en celular | El mapa depende de servicios externos (MapLibre por CDN y teselas de OpenStreetMap); sin servidor no podría tener compuerta | Sí <pendiente: segunda herramienta> |
+| Vistas | Página HTML + MapLibre GL (hecha con Claude) | Nada: un archivo HTML; MapLibre y OpenStreetMap sin llave | MapLibre: BSD-3 (OSI); mapa base: ODbL | Lee el lago del repositorio; no guarda nada | Sí: se publica sola con cada `git push` | Activo | Las 7 secciones, trazabilidad a un clic en cada cifra, mapa de las 22 comunas, funciona en celular | El mapa depende de servicios externos (MapLibre por CDN y teselas de OpenStreetMap); sin servidor no podría tener compuerta | Sí: es la única que cumple a la vez trazabilidad a un clic con el ID de la fuente, celular y datos leídos del repositorio sin pasos a mano |
+| Vistas | kepler.gl (demo web) | <qué pidió: cuenta o no> | MIT (OSI) | <dónde quedan: en el navegador; al compartir, en ...> | No: se carga el GeoJSON a mano | <versión y fecha que vieron> | <qué resolvió: mapa de las 22 comunas coloreado por no_arboles> | <qué no pudo: fuente, vigencia y fecha a un clic; ...> | No: <por qué> |
 | Publicación | GitHub Pages | Repositorio público | — | El repositorio | Sí: cada `git push` a `main` | Activo | Enlace público gratis, sin servidor | No puede ejecutar código de servidor: una compuerta de verdad sería imposible aquí | Sí: el sistema es abierto y no necesita compuerta <pendiente: segunda herramienta, por ejemplo Vercel> |
 
 ## Protección
@@ -121,6 +124,8 @@ Decidimos no parecer protegidos. El sistema es abierto: no pide clave, así que 
 | Exploración | Claude | Scripts de DuckDB para comparar herramientas | `duckdb_remoto.py` y `duckdb_lago.py` | Corrieron bien; DuckDB infirió el año como texto, a diferencia del script base |
 | Vistas | Claude | Página con las 7 secciones leyendo el lago | Un HTML que lee los JSON del repositorio, sin cifras escritas a mano | En la vista previa de Claude no cargaban los datos (bloquea conexiones externas); en GitHub la ruta daba 404 por la carpeta doble; calculó árboles por km² con el campo `area_m2` sin confirmar su significado y dio valores imposibles (17.030–42.980 por km²): se corrigió calculando el área desde el polígono |
 | Contrato | Claude | Adaptar el lago al contrato del método | Lago con `tema`, `fuentes`, `cifras` con valor/unidad/vigencia/fuente y `series`; verificación del contrato y de datos personales; `contrato/CONTRATO.md` | Corrió sin fallas (88 comprobaciones). La puerta de salida mostró los 4 archivos cambiados porque Git comparaba contra el formato anterior: hubo que subir el lago nuevo y repetir la prueba |
+| Vistas | Claude | Mostrar el estado de los árboles por comuna | Sanos, secos y muertos, sin los regulares | En la Comuna 1 los regulares eran 4.246 de 5.782: el estado se veía incompleto. Se agregaron, con el % de sanos |
+| Contrato | Claude | Unidad de cada cifra en el contrato | Puso «habitantes por km²» para la densidad de F03 | El valor era 44,56: imposible por km² para una ciudad de 2,5 millones en unos 560 km² (serían unos 4.456). La fuente mide habitantes por hectárea; se corrigió la unidad en `comun.py` y en la página |
 
 ## Revisión cruzada
 - Tres cifras auditadas por el grupo <X>: resultado y correcciones

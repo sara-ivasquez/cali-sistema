@@ -27,9 +27,8 @@
     "probado": "2026-10-05",
     "como_se_encontro": "Ejemplo del laboratorio (DuckDB remoto), cambiando 05001 por 76001",
     "observaciones": "Frecuencia declarada anual, pero datos sin actualizar desde 2022-02-21; serie 2016-2020. Fuente original: Portal Territorial DNP."
-    
-  }, 
-    {
+  },
+  {
     "id": "F03",
     "nombre": "Estimaciones y proyecciones de población y densidad. Cali, 1987-2020",
     "entidad": "Alcaldía de Santiago de Cali",
@@ -43,19 +42,19 @@
     "como_se_encontro": "Búsqueda web en el portal datos.cali.gov.co",
     "observaciones": "Cálculos del DAPM con base en DANE. Datos y metadatos sin actualizar desde 2018-10-29; proyección solo hasta 2020. La columna de descripción llega con el nombre mal codificado."
   },
-   {
+  {
     "id": "F04",
     "nombre": "Comunas de Santiago de Cali con censo arbóreo (límites y árboles por comuna)",
     "entidad": "Alcaldía de Santiago de Cali",
     "url": "https://ws-idesc.cali.gov.co/geoserver/wfs",
     "formato": "GeoJSON (servicio WFS de la IDESC, capa expediente_municipal:emc_amb_sos_car_censo_arboreo_comuna)",
     "acceso": "Servicio WFS sin llave",
-    "licencia": "CC BY-SA (sin versión declarada)",
+    "licencia": "no declara",
     "personas": "No",
     "estado": "Integrada al lago",
     "probado": "2026-10-05",
     "como_se_encontro": "GetCapabilities del WFS de la IDESC: 357 capas, 4 mencionan 'comuna'",
-    "observaciones": "La capa documentada en el portal (idesc:mc_comunas, ficha 2020) ya no existe. La capa oficial de comunas de Planeación (dapm:pdt_dpa_comunas) está publicada pero responde 'permission denied'. Se usan los límites de la capa del censo arbóreo; pueden diferir de la división oficial vigente. Licencia tomada de la ficha WMS de comunas, falta confirmarla para esta capa."
+    "observaciones": "No encontramos la ficha de licencia de esta capa. Sistema de coordenadas nativo MAGNA-SIRGAS origen Cali (EPSG:6249); se pide reproyectado a EPSG:4326. Campos deducidos con cuentas: area_m2 es cobertura arbórea (= cobarb_ha × 10.000), no el área de la comuna; sano + regular + seco + muerto = no_arboles."
   },
   {
     "id": "F05",
@@ -71,7 +70,7 @@
     "como_se_encontro": "Búsqueda web en dane.gov.co",
     "observaciones": "Es la fuente vigente de población (F03 llega a 2020), pero viene en Excel: leerla exige openpyxl o descargar a mano. Pendiente decidir si se integra."
   },
-    {
+  {
     "id": "F06",
     "nombre": "Capa de comunas documentada en el portal (idesc:mc_comunas)",
     "entidad": "Alcaldía de Santiago de Cali",
