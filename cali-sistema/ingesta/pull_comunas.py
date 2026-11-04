@@ -54,10 +54,17 @@ if not capas:
     (RAW / "comunas_intentos.txt").write_text("\n".join(intentos), encoding="utf-8")
     sys.exit("✗ El servidor no publica ninguna capa de comunas. Detalle en lago/raw/comunas_intentos.txt")
 
-# Primero las que parecen límites puros; las de observatorios (obs_, x_comuna) al final
-capas.sort(key=lambda n: (0 if n.lower().endswith("comunas") else 1, "obs" in n.lower()))
+# F04 es el CENSO ARBÓREO por comuna: el sistema responde "¿cuántos árboles hay en cada
+# comuna?" con esta capa, así que exigimos que traiga sus campos (no_arboles, arbol_sano...).
+# Una capa de solo límites (p. ej. dapm:pdt_dpa_comunas) tiene los 22 polígonos pero no los
+# árboles: no sirve para F04. Por eso no basta con "22 polígonos"; pedimos los campos del censo.
+CAMPOS_CENSO = {"no_arboles", "arbol_sano", "arbol_seco", "arb_muerto"}
+# El censo arbóreo primero; luego el resto de capas con "comuna" como respaldo.
+capas.sort(key=lambda n: (0 if "censo_arboreo" in n.lower() else 1,
+                          0 if n.lower().endswith("comunas") else 1,
+                          "obs" in n.lower()))
 
-# 2. Probar cada capa: sirve si trae polígonos y entre 15 y 30 elementos (Cali tiene 22 comunas)
+# 2. Probar cada capa: sirve si trae polígonos, ~22 elementos y los campos del censo arbóreo
 geo, url_usada, capa_usada = None, None, None
 for capa in capas:
     url = f"{base}?" + urlencode({"service": "WFS", "version": "1.0.0", "request": "GetFeature",
@@ -80,7 +87,13 @@ for capa in capas:
     if not 15 <= len(feats) <= 30:
         anotar(f"  ✗ {capa}: {len(feats)} polígonos; se esperaban unos 22")
         continue
-    anotar(f"  ✓ {capa}: {len(feats)} polígonos")
+    props = set(feats[0].get("properties", {}))
+    if not CAMPOS_CENSO <= props:
+        faltan = sorted(CAMPOS_CENSO - props)
+        anotar(f"  ✗ {capa}: {len(feats)} polígonos, pero sin los campos del censo arbóreo "
+               f"(faltan {faltan}): es una capa de solo límites, no sirve para F04")
+        continue
+    anotar(f"  ✓ {capa}: {len(feats)} polígonos con censo arbóreo")
     geo, url_usada, capa_usada = candidato, url, capa
     break
 

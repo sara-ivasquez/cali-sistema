@@ -115,6 +115,16 @@
   .selector button[aria-pressed="true"] { background: var(--saman); color: #0d2016; border-color: var(--saman); }
   .escala { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--gris); margin-top: 10px; }
   .escala .barra { height: 10px; flex: 0 1 240px; border-radius: 5px; }
+
+  /* ---------- comparador de dos comunas ---------- */
+  .comparar-selectores { display: flex; flex-wrap: wrap; gap: 16px; }
+  .comparar-selectores label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--gris); flex: 1 1 200px; }
+  .comparar-selectores select {
+    font: 500 16px var(--texto); color: var(--tinta); background: var(--noche);
+    border: 1px solid var(--borde); border-radius: 10px; padding: 9px 12px; cursor: pointer;
+  }
+  #comparar-salida { margin-top: 18px; }
+  #comparar-salida table th[scope="row"] { color: var(--tinta); font-weight: 500; }
   .ficha-comuna { position: absolute; left: 14px; bottom: 14px; max-width: 320px; background: rgba(22,37,43,.96); border: 1px solid var(--borde); border-radius: 14px; padding: 16px; display: none; }
   .ficha-comuna.visible { display: block; }
   .ficha-comuna h3 { font-size: 28px; }
@@ -198,7 +208,7 @@
     <li><a href="#gente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.4.2 4 1.8 4.5 4.5"/></svg>Gente</a></li>
     <li><a href="#gestion"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6"/></svg>Gestión municipal</a></li>
     <li><a href="#territorio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3c3 3.5 5 6.5 5 9a5 5 0 0 1-10 0c0-2.5 2-5.5 5-9z"/><path d="M12 17v4"/></svg>Árboles por comuna</a></li>
-    <li><a href="#escucha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Interés en Cali</a></li>
+    <li><a href="#escucha"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Atención en Wikipedia</a></li>
     <li><a href="#no-sabe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17.5v.01"/></svg>Lo que no sabemos</a></li>
     <li><a href="#fuentes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Fuentes y método</a></li>
   </ul>
@@ -218,7 +228,7 @@
       <a class="pregunta" href="#gente"><h3>¿Cuánta gente vive en Cali?</h3><p id="p-gente">Población total, urbana y rural.</p></a>
       <a class="pregunta" href="#gestion"><h3>¿Qué tan bien gestiona el municipio?</h3><p id="p-gestion">Medición de Desempeño Municipal del DNP.</p></a>
       <a class="pregunta" href="#territorio"><h3>¿Cómo están los árboles en cada comuna?</h3><p id="p-territorio">Censo arbóreo en el mapa de las comunas.</p></a>
-      <a class="pregunta" href="#escucha"><h3>¿Cuánto interés despierta Cali afuera?</h3><p id="p-escucha">Visitas mensuales al artículo de Cali en Wikipedia.</p></a>
+      <a class="pregunta" href="#escucha"><h3>¿Cuánta atención recibe el artículo de Cali en Wikipedia?</h3><p id="p-escucha">Vistas mensuales del artículo de Cali en Wikipedia (consultas, no personas).</p></a>
     </div>
     <div class="bloque" style="margin-top:8px">
       <h3>Qué responde este sistema</h3>
@@ -226,7 +236,7 @@
         <li><b><span class="estado integrada">Respondida</span> ¿Cuánta gente vive en Cali, y cuánta en la zona urbana y en la rural?</b><span>Con F03, hasta el último año publicado.</span></li>
         <li><b><span class="estado integrada">Respondida</span> ¿Qué tan bien gestiona el municipio sus recursos?</b><span>Con F02, hasta el último año publicado.</span></li>
         <li><b><span class="estado integrada">Respondida</span> ¿Cuántos árboles hay en cada comuna y en qué estado están?</b><span>Con F04, en el mapa de las 22 comunas.</span></li>
-        <li><b><span class="estado integrada">Respondida</span> ¿Cuánto interés despierta Cali fuera de ella?</b><span>Con F01, mes a mes.</span></li>
+        <li><b><span class="estado integrada">Respondida</span> ¿Cuánta atención recibe el artículo de Cali en Wikipedia?</b><span>Con F01, mes a mes. Mide consultas al artículo, no personas únicas ni origen geográfico.</span></li>
       </ul>
       <p class="nota">Las cuatro preguntas de la primera entrega tienen respuesta; ninguna queda pendiente. Lo que el sistema todavía no puede responder (población actual y por comuna, calidad del aire) está en <a href="#no-sabe">Lo que no sabemos</a>.</p>
       <p class="nota">Este sistema no usa datos simulados ni aproximados (PROXY): todas las cifras salen de las fuentes integradas. Las cifras calculadas (porcentajes y árboles por km²) muestran su fórmula al tocarlas.</p>
@@ -257,8 +267,8 @@
 
   <!-- ================= ESCUCHA ================= -->
   <section class="vista" id="v-escucha" aria-labelledby="t-escucha">
-    <h2 id="t-escucha">¿Cuánto interés despierta Cali afuera?</h2>
-    <p class="intro">Cuántas personas abren cada mes el artículo de Cali en la Wikipedia en español. Es una señal de interés, no una medida de turismo ni de reputación.</p>
+    <h2 id="t-escucha">¿Cuánta atención recibe el artículo de Cali en Wikipedia?</h2>
+    <p class="intro">Cuántas veces se consulta cada mes el artículo «Cali» en la Wikipedia en español. La API de Wikimedia cuenta vistas del artículo (acceso «user», que excluye bots), no personas únicas: una misma persona puede abrirlo varias veces. Tampoco dice de dónde vienen las consultas, así que no es una medida de interés «de fuera de Cali», ni de turismo o reputación.</p>
     <div id="escucha-contenido"></div>
   </section>
 
@@ -304,8 +314,12 @@
    ===================================================================== */
 const REPO = "sara-ivasquez/cali-sistema";
 const RAMA = "main";
+// El repositorio guarda todo el proyecto dentro de una subcarpeta "cali-sistema/",
+// así que la ruta raw de los datos lleva ese prefijo. Los fallbacks "../" y "./"
+// cubren el caso de abrir la página desde web/ dentro del repo ya clonado.
+const SUBCARPETA = "cali-sistema/";
 const PARAM_BASE = new URLSearchParams(location.search).get("base"); // solo para pruebas locales
-const BASES = PARAM_BASE ? [PARAM_BASE] : [`https://raw.githubusercontent.com/${REPO}/${RAMA}/`, "../", "./"];
+const BASES = PARAM_BASE ? [PARAM_BASE] : [`https://raw.githubusercontent.com/${REPO}/${RAMA}/${SUBCARPETA}`, "../", "./"];
 const ARCHIVOS = {
   poblacion: "lago/poblacion.json",
   desempeno: "lago/desempeno.json",
@@ -444,6 +458,8 @@ function abrirTraza(t) {
   const filas = [];
   filas.push(["Cifra", `${esc(t.texto)}${t.detalle ? " — " + esc(t.detalle) : ""}`]);
   if (t.metrica) filas.push(["Cómo se calcula", `${esc(METRICAS[t.metrica].nombre)}<div class="formula">${esc(METRICAS[t.metrica].formula)}</div>`]);
+  if (t.formulaLibre) filas.push(["Cómo se calcula", `<div class="formula">${esc(t.formulaLibre)}</div>`]);
+  if (t.fuentesValores) filas.push(["Valores comparados", esc(t.fuentesValores)]);
   if (f) {
     filas.push(["Fuente", `${esc(f.id)} · ${esc(f.nombre)}`]);
     filas.push(["Entidad", esc(f.entidad)]);
@@ -608,6 +624,7 @@ function vistaGente() {
         etiquetas: r.map(x => String(x.anio)), formatoY: compacto, cadaX: 5,
       })}
       <p class="nota">Entre ${esc(ini.anio)} y ${esc(u.anio)} la población cambió ${cifra("poblacion", METRICAS.variacion_pob.formato(vari), `${ini.anio}–${u.anio}`, { metrica: "variacion_pob" })}. Según la descripción de la fuente, los primeros años de la serie son estimaciones y los más recientes, proyecciones.</p>
+      <p class="selector" style="margin-top:14px"><a href="explorar/chartjs_poblacion.html${location.search}" class="selector-enlace" style="font:500 15px var(--texto);color:var(--tinta);background:var(--monte);border:1px solid var(--borde);border-radius:999px;padding:7px 14px;text-decoration:none;display:inline-block">Ver la misma serie con Chart.js</a> <span style="color:var(--gris);font-size:14px">— exploración de herramientas, se abre aparte</span></p>
     </div>
     ${u.poblacion_rural != null ? `<div class="bloque grafica">
       <h3>Población rural (corregimientos)</h3>
@@ -683,6 +700,19 @@ function vistaTerritorio() {
       <div class="ficha-comuna" id="ficha-comuna" aria-live="polite"></div>
     </div>
     <div class="escala" id="escala"></div>
+    <div class="bloque" id="comparador" style="margin-top:20px">
+      <h3>Comparar dos comunas</h3>
+      <p class="intro" style="margin-bottom:16px">Elige dos comunas para ver sus cifras lado a lado y la diferencia entre ellas. Es una descripción de los datos del censo arbóreo, no un juicio sobre cuál comuna está mejor.</p>
+      <div class="comparar-selectores">
+        <label>Comuna A
+          <select id="comuna-a"></select>
+        </label>
+        <label>Comuna B
+          <select id="comuna-b"></select>
+        </label>
+      </div>
+      <div id="comparar-salida" aria-live="polite"></div>
+    </div>
     <div class="bloque tabla-caja" style="margin-top:20px" id="tabla-comunas"></div>`;
 
   caja.querySelectorAll("[data-metrica]").forEach(b => b.addEventListener("click", () => {
@@ -690,8 +720,98 @@ function vistaTerritorio() {
     caja.querySelectorAll("[data-metrica]").forEach(x => x.setAttribute("aria-pressed", x === b));
     pintarMapa();
   }));
+  comparadorComunas();
   tablaComunas();
   crearMapa();
+}
+
+/* ---------- comparador de dos comunas ---------- */
+// Indicadores comparables. Las fórmulas de las derivadas se reutilizan de METRICAS;
+// "arbol_sano" es un campo crudo del censo (no una métrica derivada).
+const COMPARABLES = [
+  { metrica: "arboles" },
+  { crudo: "arbol_sano", nombre: "Árboles sanos" },
+  { metrica: "secos_muertos" },
+  { metrica: "area_km2" },
+  { metrica: "arboles_km2" },
+];
+
+function nombreComuna(p) { return p.nombre || ("Comuna " + p.id_comuna); }
+
+function valorComparable(c, p) {
+  if (c.metrica) return METRICAS[c.metrica].calcular(p);
+  return p[c.crudo] != null ? p[c.crudo] : null;
+}
+function nombreComparable(c) { return c.metrica ? METRICAS[c.metrica].nombre : c.nombre; }
+function formatoComparable(c, v) { return c.metrica ? METRICAS[c.metrica].formato(v) : fmtEntero.format(v); }
+function esArea(c) { return c.metrica === "area_km2"; }
+
+function comparadorComunas() {
+  const geo = D.comunas;
+  const salida = document.getElementById("comparar-salida");
+  const selA = document.getElementById("comuna-a"), selB = document.getElementById("comuna-b");
+  if (!geo || !selA || !selB) return;
+  const feats = geo.features.slice();
+  if (feats.length < 2) {
+    salida.innerHTML = `<p class="aviso">No hay suficientes comunas en el GeoJSON para comparar.</p>`;
+    return;
+  }
+  // ordenar por id_comuna para una lista estable
+  feats.sort((a, b) => (a.properties.id_comuna ?? 0) - (b.properties.id_comuna ?? 0));
+  const opciones = feats.map((f, i) => `<option value="${i}">${esc(nombreComuna(f.properties))}</option>`).join("");
+  selA.innerHTML = opciones; selB.innerHTML = opciones;
+  selA.selectedIndex = 0;
+  selB.selectedIndex = Math.min(1, feats.length - 1);
+  const pintar = () => pintarComparacion(feats, +selA.value, +selB.value);
+  selA.onchange = pintar; selB.onchange = pintar;
+  pintar();
+}
+
+function pintarComparacion(feats, iA, iB) {
+  const salida = document.getElementById("comparar-salida");
+  if (iA === iB) {
+    salida.innerHTML = `<p class="aviso">Selecciona dos comunas distintas para ver la diferencia.</p>`;
+    return;
+  }
+  const pA = feats[iA].properties, pB = feats[iB].properties;
+  const nA = nombreComuna(pA), nB = nombreComuna(pB);
+  const filas = COMPARABLES.map(c => {
+    const vA = valorComparable(c, pA), vB = valorComparable(c, pB);
+    const celdaA = vA == null ? `<td class="num">sin dato</td>`
+      : `<td class="num">${cifra("comunas", formatoComparable(c, vA), null, c.metrica ? { metrica: c.metrica, detalle: nA } : { detalle: `${nA}, campo ${c.crudo}` })}</td>`;
+    const celdaB = vB == null ? `<td class="num">sin dato</td>`
+      : `<td class="num">${cifra("comunas", formatoComparable(c, vB), null, c.metrica ? { metrica: c.metrica, detalle: nB } : { detalle: `${nB}, campo ${c.crudo}` })}</td>`;
+    let celdaDif = `<td class="num">sin dato</td>`;
+    if (vA != null && vB != null) {
+      const dif = vA - vB;
+      const difTxt = (dif > 0 ? "+" : "") + (esArea(c) ? fmtUno.format(dif) + " km²" : fmtEntero.format(dif));
+      const origen = c.metrica
+        ? `${nombreComparable(c)} de ${nA} (${METRICAS[c.metrica].formula}) menos ${nombreComparable(c)} de ${nB}`
+        : `${nombreComparable(c)} de ${nA} (campo ${c.crudo}) menos ${nombreComparable(c)} de ${nB} (campo ${c.crudo})`;
+      // diferencia porcentual respecto a B, solo si B != 0
+      let pctTxt = "";
+      if (vB !== 0) {
+        const pct = dif / vB * 100;
+        pctTxt = ` <span class="vig">(${(pct >= 0 ? "+" : "") + fmtUno.format(pct)} % respecto a B)</span>`;
+      } else {
+        pctTxt = ` <span class="vig">(% respecto a B no definido: B = 0)</span>`;
+      }
+      celdaDif = `<td class="num">${cifra("comunas", difTxt, null, {
+        detalle: `A − B = ${nA} − ${nB}`,
+        formulaLibre: `A − B${vB !== 0 ? " · variación % respecto a B = (A − B) / B × 100" : " · B = 0, no se calcula el porcentaje"}`,
+        fuentesValores: origen,
+      })}${pctTxt}</td>`;
+    }
+    return `<tr><th scope="row">${esc(nombreComparable(c))}</th>${celdaA}${celdaB}${celdaDif}</tr>`;
+  }).join("");
+  salida.innerHTML = `
+    <div class="tabla-caja">
+      <table>
+        <thead><tr><th scope="col">Indicador</th><th scope="col">${esc(nA)} (A)</th><th scope="col">${esc(nB)} (B)</th><th scope="col">Diferencia A − B</th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table>
+    </div>
+    <p class="nota">La diferencia es el valor de A menos el de B. El porcentaje, cuando aparece, se calcula respecto a B. Área y árboles por km² usan el área calculada desde la geometría, no el campo <code>area_m2</code>. Toca cualquier cifra para ver su fuente y, en las diferencias, su fórmula.</p>`;
 }
 
 function rangosMetrica(k) {
@@ -805,7 +925,7 @@ function tablaComunas() {
   };
   const caja = document.getElementById("tabla-comunas");
   caja.innerHTML = `<h3>Las comunas una por una</h3><table><thead><tr>${cols.map(th).join("")}</tr></thead><tbody>${filas.map(p => `<tr>${cols.map(c => td(c, p)).join("")}</tr>`).join("")}</tbody></table>
-    <p class="nota">Ordena la tabla tocando el nombre de una columna. Sanos + regulares + secos + muertos suman el total de árboles de cada comuna. No se muestran los campos del censo cuyo significado no está descrito en la fuente (las siglas EEP y EEC, árboles por habitante); area_m2 resultó ser la cobertura arbórea, no el área de la comuna, que aquí se calcula desde el polígono.</p>`;
+    <p class="nota">Ordena la tabla tocando el nombre de una columna. Sanos + regulares + secos + muertos cuadra con el total en 21 de las 22 comunas; en la Comuna 5 la suma queda 57 árboles por debajo del total que reporta la fuente (lo dejamos como viene, sin ajustarlo). No se muestran los campos del censo cuyo significado no está descrito en la fuente (las siglas EEP y EEC, árboles por habitante); area_m2 resultó ser la cobertura arbórea, no el área de la comuna, que aquí se calcula desde el polígono.</p>`;
   caja.querySelectorAll("[data-orden]").forEach(b => b.addEventListener("click", () => {
     const campo = b.dataset.orden;
     ordenComunas = { campo, asc: ordenComunas.campo === campo ? !ordenComunas.asc : campo === "id_comuna" };
@@ -831,7 +951,7 @@ function vistaEscucha() {
         cadaX: 3, etiquetaX: i => { const [a, m] = r[i].periodo.split("-"); return `${MESES[+m - 1].slice(0, 3)} ${a.slice(2)}`; },
         formato: v => fmtEntero.format(v) + " visitas",
       })}
-      <p class="nota">Cuenta solo las visitas de personas al artículo «Cali»; no incluye las que entran por «Santiago de Cali».</p>
+      <p class="nota">Cuenta vistas del artículo «Cali» con acceso «user» (excluye bots), no personas únicas; no incluye las del artículo «Santiago de Cali» ni dice de dónde vienen las consultas.</p>
     </div>`;
 }
 

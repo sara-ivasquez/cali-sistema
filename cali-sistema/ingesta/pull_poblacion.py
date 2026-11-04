@@ -1,6 +1,7 @@
 """F03 · Población y densidad de Cali 1987-2020 (datos.cali.gov.co, API CKAN)."""
+import json
 import sys
-from comun import bajar_json, guardar_crudo, guardar_lago
+from comun import RAIZ, bajar_json, guardar_crudo, guardar_lago
 
 RECURSO = "fb8150d6-2af0-4d75-b741-33aaf871b19c"
 URL = f"https://datos.cali.gov.co/api/3/action/datastore_search?resource_id={RECURSO}&limit=100"
@@ -25,7 +26,17 @@ def numero(v):
         return float(s.replace(".", "").replace(",", "."))
 
 
-datos = bajar_json(URL)
+try:
+    datos = bajar_json(URL)
+except Exception as e:
+    # La fuente no respondió (p. ej. el portal devolvió 403). No tocamos lago/poblacion.json:
+    # se conserva el último dato real con su fecha de prueba. Nunca inventamos una corrida.
+    destino = (RAIZ / "lago" / "poblacion.json")
+    if destino.exists():
+        prev = json.loads(destino.read_text(encoding="utf-8"))
+        sys.exit(f"✗ F03 no respondió ({e}). Se conserva lago/poblacion.json "
+                 f"con su dato real probado {prev.get('probado')} (no se reescribe ni se cambia la fecha).")
+    sys.exit(f"✗ F03 no respondió ({e}) y no hay lago/poblacion.json previo que conservar.")
 guardar_crudo("poblacion", datos)
 filas = datos["result"]["records"]
 

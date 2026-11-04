@@ -9,9 +9,9 @@
     "licencia": "CC0",
     "personas": "No",
     "estado": "Integrada al lago",
-    "probado": "2026-10-05",
+    "probado": "2026-11-04",
     "como_se_encontro": "Ejemplo del laboratorio, adaptado a Cali",
-    "observaciones": "El artículo 'Cali' es el principal (no redirección ni desambiguación; esa es 'Cali (desambiguación)'). No cuenta visitas que entran por 'Santiago de Cali'."
+    "observaciones": "El artículo 'Cali' es el principal (no redirección ni desambiguación; esa es 'Cali (desambiguación)'). La API de Wikimedia pageviews cuenta VISTAS del artículo con acceso 'user' (excluye bots), NO personas únicas: una misma persona puede verlo varias veces. No tiene dimensión geográfica, así que no mide interés 'de fuera de Cali'. No incluye las vistas del artículo 'Santiago de Cali'."
   },
   {
     "id": "F02",
@@ -24,7 +24,7 @@
     "licencia_url": "https://creativecommons.org/licenses/by-sa/4.0/",
     "personas": "No",
     "estado": "Integrada al lago",
-    "probado": "2026-10-05",
+    "probado": "2026-11-04",
     "como_se_encontro": "Ejemplo del laboratorio (DuckDB remoto), cambiando 05001 por 76001",
     "observaciones": "Frecuencia declarada anual, pero datos sin actualizar desde 2022-02-21; serie 2016-2020. Fuente original: Portal Territorial DNP."
   },
@@ -38,9 +38,9 @@
     "licencia": "CC BY-SA (sin versión declarada)",
     "personas": "No",
     "estado": "Integrada al lago",
-    "probado": "2026-10-05",
+    "probado": "2026-10-06",
     "como_se_encontro": "Búsqueda web en el portal datos.cali.gov.co",
-    "observaciones": "Cálculos del DAPM con base en DANE. Datos y metadatos sin actualizar desde 2018-10-29; proyección solo hasta 2020. La columna de descripción llega con el nombre mal codificado."
+    "observaciones": "Cálculos del DAPM con base en DANE. Datos y metadatos sin actualizar desde 2018-10-29; proyección solo hasta 2020. La columna de descripción llega con el nombre mal codificado. El 2026-11-04 el portal respondió HTTP 403 a la API: se conserva el dato real de la última corrida con éxito (2026-10-06) y no se reescribe ni se cambia la fecha. La densidad bruta de la fuente está en habitantes por hectárea."
   },
   {
     "id": "F04",
@@ -52,9 +52,9 @@
     "licencia": "no declara",
     "personas": "No",
     "estado": "Integrada al lago",
-    "probado": "2026-10-05",
+    "probado": "2026-11-04",
     "como_se_encontro": "GetCapabilities del WFS de la IDESC: 357 capas, 4 mencionan 'comuna'",
-    "observaciones": "No encontramos la ficha de licencia de esta capa. Sistema de coordenadas nativo MAGNA-SIRGAS origen Cali (EPSG:6249); se pide reproyectado a EPSG:4326. Campos deducidos con cuentas: area_m2 es cobertura arbórea (= cobarb_ha × 10.000), no el área de la comuna; sano + regular + seco + muerto = no_arboles."
+    "observaciones": "No encontramos la ficha de licencia de esta capa (licencia 'no declara', sin verificar en la ficha de la capa). Sistema de coordenadas nativo MAGNA-SIRGAS origen Cali (EPSG:6249); se pide reproyectado a EPSG:4326. Interpretaciones INFERIDAS con cuentas (no definiciones oficiales de la fuente): area_m2 parece ser cobertura arbórea, no el área de la comuna, porque coincide con cobarb_ha × 10.000 salvo redondeo (cobarb_ha viene a 3 decimales; diferencias de 1 a 5 m² en las 22 comunas, ninguna coincidencia exacta); y sano + regular + seco + muerto = no_arboles en 21 de 22 comunas (la Comuna 5 queda 57 árboles por debajo del total que reporta la fuente). La ingesta exige explícitamente que la capa elegida traiga los campos del censo (no_arboles, arbol_sano...), para no caer en una capa de solo límites."
   },
   {
     "id": "F05",
@@ -93,9 +93,9 @@
     "acceso": "Servicio WFS sin llave",
     "licencia": "no declara",
     "personas": "No",
-    "estado": "No responde",
-    "probado": "2026-10-05",
+    "estado": "Descartada",
+    "probado": "2026-11-04",
     "como_se_encontro": "GetCapabilities del WFS de la IDESC (357 capas, 4 con 'comuna')",
-    "observaciones": "Está publicada, pero el servidor responde con un error interno: 'permission denied for table pdt_dpa_comunas'. Es la división oficial; por eso F04 puede diferir de los límites vigentes."
+    "observaciones": "En octubre respondía 'permission denied for table pdt_dpa_comunas'; el 2026-11-04 el servidor ya devolvió sus 22 polígonos (el acceso cambió). Aun así no la integramos: es solo la división oficial y no trae el censo arbóreo (no_arboles, arbol_sano...), que es lo que el sistema necesita para responder la pregunta de los árboles. Por eso seguimos con F04. Queda como fuente de límites oficiales descartada para esta entrega."
   }
 ]

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exploración · Vistas · Chart.js vs SVG propio (población F03)</title>
+<style>
+  :root { --noche: #0f1a1e; --monte: #16252b; --borde: #24383f; --tinta: #e6efec; --gris: #93a7a8; --mango: #f2b544; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--noche); color: var(--tinta); font: 400 16px/1.55 system-ui, sans-serif; padding: 24px clamp(16px, 4vw, 48px); }
+  h1 { font-size: 24px; margin: 0 0 4px; }
+  .volver { display: inline-block; color: var(--mango); font-size: 14px; margin: 0 0 14px; }
+  .nota { border-left: 3px solid var(--mango); background: #2a2619; color: #f1e4c9; padding: 12px 16px; border-radius: 0 10px 10px 0; margin: 14px 0 20px; max-width: 80ch; }
+  .bloque { background: var(--monte); border: 1px solid var(--borde); border-radius: 16px; padding: 20px; max-width: 860px; }
+  .meta { color: var(--gris); font-size: 14px; margin: 10px 0 0; }
+  .error { border: 1px solid #ef6f5e; color: #f6c9c1; border-radius: 12px; padding: 14px 16px; max-width: 860px; }
+  code { background: #0f1a1e; padding: 1px 5px; border-radius: 5px; }
+  canvas { background: transparent; }
+  a { color: var(--mango); }
+  :focus-visible { outline: 2px solid var(--mango); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<a class="volver" href="../index.html#gente">← Volver a Gente</a>
+<h1>Exploración de herramientas · tramo Vistas</h1>
+<p class="nota">
+  <strong>Esto es una exploración, no parte del producto.</strong>
+  El sitio (<code>web/index.html</code>, sección «Gente») dibuja esta misma serie con SVG y JavaScript propio.
+  Aquí se prueba <strong>Chart.js</strong> con <em>exactamente los mismos registros reales</em>
+  de <code>lago/poblacion.json</code> (fuente F03), leídos desde el repositorio. Ninguna cifra se
+  escribe a mano. Chart.js se carga solo en esta página de exploración, no en la página principal.
+</p>
+
+<div class="bloque">
+  <canvas id="grafica" height="360" aria-label="Población de Cali por año (Chart.js)" role="img"></canvas>
+  <p class="meta" id="meta">Cargando los mismos datos del lago…</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+/* Mismo esquema de carga que web/index.html: ruta remota con la subcarpeta del repo,
+   más fallbacks relativos. Esta página vive en web/explorar/, así que para llegar a
+   lago/ en el repo clonado se suben dos niveles (web/explorar/ -> web/ -> raíz). */
+const REPO = "sara-ivasquez/cali-sistema";
+const RAMA = "main";
+const SUBCARPETA = "cali-sistema/";
+const PARAM_BASE = new URLSearchParams(location.search).get("base"); // para pruebas locales
+const BASES = PARAM_BASE
+  ? [PARAM_BASE]
+  : [`https://raw.githubusercontent.com/${REPO}/${RAMA}/${SUBCARPETA}`, "../../", "./"];
+const ARCHIVO = "lago/poblacion.json";
+
+// Formato colombiano, igual que el producto
+const fmtEntero = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 });
+function compacto(v) {
+  if (v >= 1e6) return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 1 }).format(v / 1e6) + " M";
+  if (v >= 1e3) return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 1 }).format(v / 1e3) + " mil";
+  return fmtEntero.format(v);
+}
+
+async function traer(ruta) {
+  let ultimo;
+  for (const b of BASES) {
+    try {
+      const r = await fetch(b + ruta, { cache: "no-cache" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
+    } catch (e) { ultimo = new Error(`${b + ruta} → ${e.message}`); }
+  }
+  throw ultimo;
+}
+
+(async function () {
+  let p;
+  try {
+    p = await traer(ARCHIVO);
+  } catch (e) {
+    document.querySelector(".bloque").outerHTML =
+      `<div class="error" role="alert">No se pudo cargar la fuente F03 (${ARCHIVO}): ${e.message}. Se intentó desde: ${BASES.join(" , ")}.</div>`;
+    return;
+  }
+
+  const r = p.registros;                 // los mismos registros que usa la página
+  const anios = r.map(x => x.anio);
+  const valores = r.map(x => x.poblacion);
+  const ini = r[0], fin = r[r.length - 1];
+
+  new Chart(document.getElementById("grafica"), {
+    type: "line",
+    data: {
+      labels: anios,
+      datasets: [{
+        label: "Población total",
+        data: valores,
+        borderColor: "#f2b544",
+        backgroundColor: "rgba(242,181,68,.12)",
+        borderWidth: 3,
+        pointRadius: 0,
+        tension: 0,
+        fill: true,
+      }],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: "#e6efec" } },
+        tooltip: { callbacks: { label: ctx => "Población: " + fmtEntero.format(ctx.parsed.y) } },
+      },
+      scales: {
+        x: { ticks: { color: "#93a7a8" }, grid: { color: "#24383f" } },
+        y: { beginAtZero: true, ticks: { color: "#93a7a8", callback: v => compacto(v) }, grid: { color: "#24383f" } },
+      },
+    },
+  });
+
+  document.getElementById("meta").innerHTML =
+    `Fuente ${p.fuente} · vigencia ${p.vigencia} · probado ${p.probado}. ` +
+    `Serie de ${ini.anio} a ${fin.anio} (${r.length} años). ` +
+    `Último año ${fin.anio}: ${fmtEntero.format(fin.poblacion)} habitantes. ` +
+    `Datos leídos de <code>${ARCHIVO}</code> en el repositorio; ninguna cifra escrita a mano.`;
+})();
+</script>
+</body>
+</html>

@@ -1,13 +1,13 @@
 {
  "tema": "territorio",
- "probado": "2026-10-06",
+ "probado": "2026-11-04",
  "fuentes": [
   {
    "id": "F04",
    "nombre": "Comunas de Santiago de Cali con censo arbóreo (límites y árboles por comuna)",
    "url": "https://ws-idesc.cali.gov.co/geoserver/wfs?service=WFS&version=1.0.0&request=GetFeature&typeName=expediente_municipal%3Aemc_amb_sos_car_censo_arboreo_comuna&outputFormat=application%2Fjson&srsName=EPSG%3A4326",
    "estado": "Integrada al lago",
-   "licencia": "CC BY-SA (sin versión declarada)"
+   "licencia": "no declara"
   }
  ],
  "cifras": {

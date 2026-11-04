@@ -31,7 +31,7 @@
   },
   "densidad_ultimo_anio": {
    "valor": 44.56,
-   "unidad": "habitantes por km²",
+   "unidad": "habitantes por hectárea",
    "vigencia": "2020",
    "fuente": "F03"
   }
@@ -464,7 +464,7 @@
    ]
   },
   "densidad": {
-   "unidad": "habitantes por km²",
+   "unidad": "habitantes por hectárea",
    "fuente": "F03",
    "puntos": [
     [

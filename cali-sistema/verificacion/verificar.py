@@ -116,6 +116,39 @@ if geo_path.exists():
                 if not (CALI["lon"][0] <= lon <= CALI["lon"][1] and CALI["lat"][0] <= lat <= CALI["lat"][1]))
     comprobar(fuera == 0, f"comunas.geojson: todos los puntos dentro de Cali ({fuera} fuera)")
 
+# 4. La unidad de cada cifra y serie del lago coincide con la definición única de ingesta/comun.py.
+#    (Este control habría detectado la densidad etiquetada «por km²» cuando comun.py ya decía «por hectárea».)
+try:
+    sys.path.insert(0, str(RAIZ / "ingesta"))
+    from comun import UNIDADES  # única fuente de verdad de las unidades
+except Exception as e:  # noqa: BLE001
+    UNIDADES = None
+    comprobar(False, f"no se pudo importar UNIDADES de ingesta/comun.py para comparar unidades ({e})")
+if UNIDADES is not None:
+    for a in archivos:
+        d = json.loads(a.read_text(encoding="utf-8"))
+        n = a.name
+        for k, c in (d.get("cifras") or {}).items():
+            if isinstance(c, dict) and k in UNIDADES:
+                comprobar(c.get("unidad") == UNIDADES[k],
+                          f"{n}: unidad de cifra {k} = '{c.get('unidad')}' coincide con comun.py '{UNIDADES[k]}'")
+        for k, s in (d.get("series") or {}).items():
+            if k in UNIDADES:
+                comprobar(s.get("unidad") == UNIDADES[k],
+                          f"{n}: unidad de serie {k} = '{s.get('unidad')}' coincide con comun.py '{UNIDADES[k]}'")
+
+# 5. Coherencia de población: urbana + rural = total, año por año (si están los tres).
+pobl = RAIZ / "lago" / "poblacion.json"
+if pobl.exists():
+    d = json.loads(pobl.read_text(encoding="utf-8"))
+    descuadres = []
+    for r in d.get("registros", []):
+        if all(r.get(k) is not None for k in ("poblacion", "poblacion_urbana", "poblacion_rural")):
+            if r["poblacion_urbana"] + r["poblacion_rural"] != r["poblacion"]:
+                descuadres.append(r.get("anio"))
+    comprobar(not descuadres,
+              f"poblacion.json: urbana + rural = total en todos los años {('(descuadra en ' + str(descuadres) + ')') if descuadres else ''}".rstrip())
+
 print(f"{pruebas} comprobaciones, {len(fallas)} fallas")
 for f in fallas:
     print("  FAIL", f)

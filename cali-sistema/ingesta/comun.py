@@ -12,8 +12,8 @@ UA = {"User-Agent": "taller-sistemas-de-informacion/1.0 (curso universitario EAF
 
 # Unidad de cada cifra y de cada serie. Se define UNA vez, aquí; una cifra sin unidad no entra al lago.
 UNIDADES = {
-    "vistas_ultimo_mes": "vistas de personas",
-    "vistas": "vistas de personas",
+    "vistas_ultimo_mes": "vistas del artículo (agente humano, sin bots)",
+    "vistas": "vistas del artículo (agente humano, sin bots)",
     "mdm_ultimo_anio": "puntos de 0 a 100",
     "mdm": "puntos de 0 a 100",
     "poblacion_ultimo_anio": "habitantes",
