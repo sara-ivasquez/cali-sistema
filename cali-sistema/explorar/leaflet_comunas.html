@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exploración · Comunas de Cali con Leaflet (no_arboles)</title>
+<!--
+  Exploración de herramientas de visualización — NO es el producto.
+  El producto usa MapLibre GL (ver web/index.html). Esta página prueba una segunda
+  herramienta (Leaflet) sobre EXACTAMENTE los mismos datos (territorio/comunas.geojson)
+  y la MISMA métrica (no_arboles), para la comparación que pide la entrega.
+  Se abre sola (archivo o servidor estático). Acepta ?base= igual que el producto,
+  para forzar que lea la misma copia del GeoJSON.
+-->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<style>
+  :root { --tinta:#eaf2f2; --gris:#9fb0b0; --monte:#101b1f; --borde:#22333a; --oro:#f2b544; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background:#0b1316; color:var(--tinta); }
+  header { padding: 18px 20px; border-bottom: 1px solid var(--borde); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  header p { margin: 0; color: var(--gris); font-size: 14px; }
+  .exploracion { display:inline-block; font-size:12px; color:#0b1316; background:var(--oro); border-radius:999px; padding:2px 10px; margin-bottom:8px; font-weight:600; }
+  .envoltura { display: grid; grid-template-columns: 1fr 320px; gap: 0; }
+  #mapa { height: 72vh; min-height: 420px; background:#0c1518; }
+  aside { padding: 18px 20px; border-left: 1px solid var(--borde); overflow-y:auto; max-height:72vh; }
+  aside h2 { font-size: 16px; margin: 0 0 10px; }
+  dl { margin: 0; }
+  dt { color: var(--gris); font-size: 13px; margin-top: 10px; }
+  dd { margin: 1px 0 0; }
+  .escala { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--gris); margin-top:14px; flex-wrap:wrap; }
+  .barra { height:12px; width:140px; border-radius:6px; display:inline-block; }
+  .fuente { margin-top:18px; padding-top:14px; border-top:1px solid var(--borde); font-size:13px; color:var(--gris); }
+  .fuente b { color: var(--tinta); }
+  .error { color:#ff9a9a; padding:16px; }
+  @media (max-width: 780px) { .envoltura { grid-template-columns: 1fr; } aside { border-left:0; border-top:1px solid var(--borde); max-height:none; } }
+  .leaflet-popup-content { font: 14px/1.4 system-ui; }
+</style>
+</head>
+<body>
+<header>
+  <span class="exploracion">Exploración de herramientas · Kiro</span>
+  <h1>Comunas de Cali coloreadas por número de árboles (no_arboles)</h1>
+  <p>Segunda herramienta de visualización (Leaflet) sobre los mismos datos que el producto (MapLibre). Toca una comuna para ver su detalle. No es el sistema: es la prueba comparativa.</p>
+</header>
+<div class="envoltura">
+  <div id="mapa"></div>
+  <aside>
+    <h2 id="detalle-titulo">Toca una comuna</h2>
+    <dl id="detalle"><dt>Detalle</dt><dd>Selecciona una comuna en el mapa.</dd></dl>
+    <div class="escala" id="escala"></div>
+    <div class="fuente" id="fuente">Cargando la fuente…</div>
+  </aside>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+// Mismo criterio de base que el producto: ?base= fuerza una única copia (reproducibilidad).
+// Sin ?base=, se prueba el repo publicado y luego las rutas relativas desde explorar/.
+const PARAM_BASE = new URLSearchParams(location.search).get("base");
+const REPO = "sara-ivasquez/cali-sistema", RAMA = "main", SUB = "cali-sistema/";
+const BASES = PARAM_BASE ? [PARAM_BASE]
+  : [`https://raw.githubusercontent.com/${REPO}/${RAMA}/${SUB}`, "../", "../../"];
+const RUTA_GEO = "territorio/comunas.geojson";
+const RUTA_CAT = "catalogo/fuentes.json";
+const PALETA = ["#17313a", "#1f6b54", "#4f9d42", "#c7c037", "#f2b544"]; // igual espíritu que el producto
+const fmt = new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 });
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+
+async function traer(ruta) {
+  let err;
+  for (const b of BASES) {
+    try { const r = await fetch(b + ruta, { cache: "no-cache" }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
+    catch (e) { err = e; }
+  }
+  throw err;
+}
+
+// Cortes por cuantiles, igual idea que rangosMetrica() del producto, para que la comparación sea justa.
+function cortesCuantiles(valores) {
+  const v = valores.filter(x => x != null).sort((a, b) => a - b);
+  const cortes = [];
+  for (let i = 1; i < PALETA.length; i++) cortes.push(v[Math.floor(i * v.length / PALETA.length)]);
+  return { cortes, min: v[0], max: v[v.length - 1] };
+}
+function color(valor, cortes) {
+  if (valor == null) return "#333";
+  let c = 0; while (c < cortes.length && valor >= cortes[c]) c++;
+  return PALETA[c];
+}
+
+function detalle(p) {
+  const fila = (etq, val) => val == null ? "" : `<dt>${esc(etq)}</dt><dd>${fmt.format(val)}</dd>`;
+  document.getElementById("detalle-titulo").textContent = p.nombre || ("Comuna " + p.id_comuna);
+  document.getElementById("detalle").innerHTML =
+    fila("Árboles censados (no_arboles)", p.no_arboles) +
+    fila("Sanos (arbol_sano)", p.arbol_sano) +
+    fila("Regulares (arb_regula)", p.arb_regula) +
+    fila("Secos (arbol_seco)", p.arbol_seco) +
+    fila("Muertos (arb_muerto)", p.arb_muerto);
+}
+
+(async function () {
+  let geo, cat;
+  try { geo = await traer(RUTA_GEO); } catch (e) {
+    document.getElementById("mapa").innerHTML = `<div class="error">No se pudo cargar ${RUTA_GEO}: ${esc(e.message)}</div>`;
+    return;
+  }
+  try { cat = await traer(RUTA_CAT); } catch (e) { cat = []; }
+
+  const mapa = L.map("mapa", { scrollWheelZoom: true });
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19, attribution: "© colaboradores de OpenStreetMap",
+  }).addTo(mapa);
+
+  const valores = geo.features.map(f => f.properties.no_arboles);
+  const { cortes, min, max } = cortesCuantiles(valores);
+
+  const capa = L.geoJSON(geo, {
+    style: f => ({ color: "#0f1a1e", weight: 1, fillColor: color(f.properties.no_arboles, cortes), fillOpacity: 0.78 }),
+    onEachFeature: (f, lyr) => {
+      const p = f.properties;
+      lyr.bindTooltip(`${esc(p.nombre || "Comuna " + p.id_comuna)}: ${fmt.format(p.no_arboles)} árboles`, { sticky: true });
+      lyr.on({
+        click: () => { detalle(p); lyr.setStyle({ weight: 3, color: "#f2b544" }); },
+        mouseout: () => capa.resetStyle(lyr),
+      });
+    },
+  }).addTo(mapa);
+  mapa.fitBounds(capa.getBounds(), { padding: [16, 16] });
+
+  document.getElementById("escala").innerHTML =
+    `<span>${fmt.format(min)}</span><span class="barra" style="background:linear-gradient(90deg,${PALETA.join(",")})"></span><span>${fmt.format(max)}</span><span>Árboles censados</span>`;
+
+  const f04 = (cat || []).find(x => x.id === "F04") || {};
+  document.getElementById("fuente").innerHTML =
+    `<b>Fuente:</b> ${esc(geo.fuente || "F04")} · ${esc(f04.nombre || "")}<br>` +
+    `<b>Entidad:</b> ${esc(f04.entidad || "")}<br>` +
+    `<b>Licencia:</b> ${esc(f04.licencia || "no declara")}<br>` +
+    `<b>Vigencia:</b> ${esc(geo.vigencia || "—")}<br>` +
+    `<b>Capa:</b> ${esc(geo.capa || "")}<br>` +
+    `<b>Fuente probada el:</b> ${esc(geo.probado || f04.probado || "—")}<br>` +
+    `<b>Herramienta:</b> Leaflet 1.9.4 (BSD-2) · teselas OpenStreetMap (ODbL)`;
+})();
+</script>
+</body>
+</html>

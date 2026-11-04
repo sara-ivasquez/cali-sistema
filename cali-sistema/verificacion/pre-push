@@ -1,0 +1,22 @@
+#!/bin/sh
+# Compuerta de publicación: antes de hacer push (que publica en GitHub Pages),
+# corre la verificación. Con una sola falla, el push se cancela y no se publica
+# ningún dato nuevo.
+#
+# Instalación (una vez por clon):
+#   cp cali-sistema/verificacion/pre-push .git/hooks/pre-push
+#   chmod +x .git/hooks/pre-push
+#
+# Se salta con --no-verify a propósito (no lo hagas para publicar datos).
+
+RAIZ=$(git rev-parse --show-toplevel)
+PROY="$RAIZ/cali-sistema"
+
+echo "→ Compuerta: verificando el lago antes de publicar…"
+if ! python3 "$PROY/verificacion/verificar.py"; then
+  echo "✗ La verificación falló: no se publica. Corrige las fallas y vuelve a intentar."
+  echo "  (Para saltar la compuerta a propósito: git push --no-verify)"
+  exit 1
+fi
+echo "✓ Verificación OK: se permite el push."
+exit 0

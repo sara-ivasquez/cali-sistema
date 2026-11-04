@@ -1,0 +1,8 @@
+# Entorno virtual local (no se versiona)
+.venv/
+# Sistema y editores
+.DS_Store
+*.swp
+*~
+__pycache__/
+*.pyc

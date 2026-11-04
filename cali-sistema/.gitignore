@@ -7,3 +7,10 @@ __pycache__/
 *.pyc
 .venv/
 *.duckdb
+# Sistema y editores
+.DS_Store
+*.swp
+*~
+# Paquete auxiliar para actualizar el Excel (se mueve al respaldo, no se publica)
+entrega_excel/
+entrega_excel_cali.zip
